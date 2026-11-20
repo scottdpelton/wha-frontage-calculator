@@ -34,6 +34,7 @@ h1{font-size:17px;font-weight:650;letter-spacing:-.01em;margin:0}
 .app{display:grid;grid-template-columns:520px minmax(0,1fr);gap:12px;padding:12px max(12px,2vw);max-width:1500px;margin:0 auto;align-items:start}
 @media(min-width:981px){.rail{position:sticky;top:calc(var(--bar,60px) + 12px);max-height:calc(100vh - var(--bar,60px) - 24px);overflow-y:auto;scrollbar-width:thin;padding-right:2px}.rail .panel:last-child{margin-bottom:0}}
 @media(max-width:980px){.app{grid-template-columns:minmax(0,1fr)}}
+.app2{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:0 max(12px,2vw) 12px;max-width:1500px;margin:0 auto}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:12px}
 h2{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 8px;text-transform:none}
 .muted{color:var(--muted)}
@@ -235,6 +236,8 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
     </section>
   </div>
 
+</div>
+<div class="app2">
   <div class="wide">
     <details id="dCity"><summary><b id="mName"></b><span>editable</span></summary><div class="body">
       <div class="grid" id="mParams"></div>
