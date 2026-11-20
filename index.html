@@ -446,11 +446,11 @@ var CITIES = [
   src:[{t:'Austin sidewalk fee in lieu',u:'https://austintexas.gov/node/89130'}],
   fn:function(s,P){ var r=P[s.use]||P.res, L=sumLen(needWalk(s)), a=L*s.width, v=a*r; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x '+s.width+' ft = '+Math.round(a).toLocaleString()+' sq ft x $'+r+' ('+({res:'residential',mf:'multifamily',com:'commercial'})[s.use]+') = '+usd(v)]}; }},
 
- {id:'brook', name:'Brookhaven, GA', group:'us', conf:'published', asof:'City page last updated 9/16/19',
-  how:'Flat $50 per linear foot paid into the sidewalk fund where sidewalks are required (2018 ordinance, per local press).',
+ {id:'brook', name:'Brookhaven, GA', group:'us', conf:'published', asof:'Council increase adopted Jan 27, 2026; reviewed annually',
+  how:'Flat payment per linear foot into the sidewalk fund where a sidewalk is required. Raised from $50 (set 2018) to $77 in January 2026. The City says the $77 assumes a 7.5 ft average width and includes an installation multiplier. The amendment requires annual review against the prior year\'s City sidewalk costs.',
   covers:'Sidewalk fund.',
-  params:[{k:'rate',l:'Charge',v:50,u:'$/ft'}],
-  src:[{t:'Brookhaven sidewalk requirements (City PDF)',u:'https://www.brookhavenga.gov/sites/default/files/fileattachments/community_development/page/18742/sidewalks.pdf'},{t:'Reporter Newspapers, May 2018 (second source for $50/ft)',u:'https://www.reporternewspapers.net/2018/05/14/brookhaven-city-council-promises-sidewalks-to-everywhere/'}],
+  params:[{k:'rate',l:'Charge',v:77,u:'$/ft'}],
+  src:[{t:'Rough Draft Atlanta, Mar 2026 (quotes the City release: $50 to $77, adopted Jan 27)',u:'https://roughdraftatlanta.com/2026/03/29/brookhaven-sidewalk-project-executive-park/'},{t:'City of Brookhaven news flash (the $77 rate and 7.5 ft assumption)',u:'https://www.brookhavenga.gov/m/newsflash/home/detail/78'}],
   fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x $'+P.rate+'/ft = '+usd(v)]}; }},
 
  {id:'nash', name:'Nashville, TN', group:'caution', conf:'invalidated', asof:'Sixth Circuit, May 10, 2023',
