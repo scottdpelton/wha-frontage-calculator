@@ -132,7 +132,13 @@ pre{font:13.5px/1.55 ui-monospace,Menlo,Consolas,monospace;background:var(--soft
 /* cities table */
 .trow,.thead,.taxis{display:grid;grid-template-columns:minmax(150px,1.3fr) 130px 96px 96px minmax(140px,1.6fr);gap:18px;align-items:center}
 .thead{font-size:12.5px;color:var(--muted);padding:0 10px 6px;border-bottom:1px solid var(--line)}
-.thead span:nth-child(n+2):nth-child(-n+4){text-align:right}
+.thead .sb:nth-child(n+2):nth-child(-n+4){text-align:right;justify-self:end}
+.sb{border:0;background:none;padding:2px 0;font:inherit;color:inherit;cursor:pointer;display:inline-flex;gap:4px;align-items:center;white-space:nowrap}
+.sb:hover{color:var(--ink)}.sb.on{color:var(--ink);font-weight:650}
+.sb::after{content:"\2195";opacity:.45;font-size:11px}.sb.on.asc::after{content:"\2191";opacity:1}.sb.on.desc::after{content:"\2193";opacity:1}
+.tsep{padding:14px 10px 6px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line)}
+.tsep b{color:var(--ink);font-weight:600}
+.trow .why{display:block;font-style:normal;font-size:12px;color:var(--muted);margin-top:1px}
 .trow{width:100%;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;padding:10px;cursor:pointer;font-size:14.5px}
 .trow:hover{background:var(--soft)}
 .trow.sel{background:var(--acc-soft)}
@@ -158,8 +164,8 @@ pre{font:13.5px/1.55 ui-monospace,Menlo,Consolas,monospace;background:var(--soft
 .kb{display:inline-block;width:16px;height:9px;background:var(--band);border-radius:2px;vertical-align:middle;margin-right:5px}
 .src{font-size:12px;font-weight:600;white-space:nowrap}
 .s-pub{color:var(--good)}.s-cost{color:var(--muted)}.s-mid{color:var(--warn)}.s-ill{color:var(--acc)}.s-bad{color:var(--bad)}.s-base{color:var(--muted)}
-@container tb (max-width:680px){.trow,.thead,.taxis{grid-template-columns:minmax(130px,1.4fr) 120px 88px 92px;gap:14px}.tt,.thead span:nth-child(5),.taxis,.key2{display:none}}
-@container tb (max-width:440px){.trow,.thead{grid-template-columns:minmax(0,1.2fr) 104px 78px;gap:10px}.tc,.thead span:nth-child(4){display:none}}
+@container tb (max-width:680px){.trow,.thead,.taxis{grid-template-columns:minmax(130px,1.4fr) 120px 88px 92px;gap:14px}.tt,.thead>:nth-child(5),.taxis,.key2{display:none}}
+@container tb (max-width:440px){.trow,.thead{grid-template-columns:minmax(0,1.2fr) 104px 78px;gap:10px}.tc,.thead>:nth-child(4){display:none}}
 /* folded */
 .wide{grid-column:1/-1}
 details{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin-bottom:8px}
@@ -240,7 +246,7 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
     <section class="panel">
       <h2>Same lot under every city · click a row</h2>
       <div class="tb">
-      <div class="thead"><span>City</span><span>Fee</span><span>Per ft</span><span>% of cost</span><span>Fee on one scale</span></div>
+      <div class="thead"><button type="button" class="sb" data-sort="name">City</button><button type="button" class="sb" data-sort="fee">Fee</button><button type="button" class="sb" data-sort="pf">Per ft</button><button type="button" class="sb" data-sort="pc">% of cost</button><span>Fee on one scale</span></div>
       <div id="tbl"></div>
       <div class="taxis"><span></span><span></span><span></span><span></span><div class="ax" id="axis"></div></div>
       <p class="key2" id="key"></p>
@@ -672,13 +678,22 @@ var ELIG = [
   function rK(lo,hi){ return Math.round(lo)===Math.round(hi)?usd(lo):k1(lo)+'–'+k1(hi); }
   function kfmt(v){ return v>=1000? '$'+(v/1000).toLocaleString('en-US',{maximumFractionDigits:1})+'k' : '$'+v; }
 
+  var SORT={k:'fee',dir:-1};
+  var NOTCMP={cob:'baseline: no fee option',sequim:'fee equals the cost estimate',wacost:'fee equals the cost estimate',olympia:'when it applies is unclear',nash:'program challenged in court; kept as a caution'};
   function renderTable(rows,C,n){
+    var RL0=sumLen(reqF(state));
+    var mid=function(x){ return x.lo==null?null:(x.lo+x.hi)/2; };
+    var key=function(x){ if(SORT.k==='name') return nm(x.c).toLowerCase(); var m=mid(x); if(m==null) return null; if(SORT.k==='pf') return RL0?m/RL0:null; if(SORT.k==='pc'){ var sh=shareOf(x,C); return sh?(sh[0]+sh[1])/2:null; } return m; };
+    var cmpRows=rows.filter(function(x){return !NOTCMP[x.c.id];}), other=rows.filter(function(x){return !!NOTCMP[x.c.id];});
+    cmpRows.sort(function(a,b){ var A=key(a),B=key(b); if(A==null&&B==null) return 0; if(A==null) return 1; if(B==null) return -1; if(A<B) return -SORT.dir; if(A>B) return SORT.dir; return nm(a.c)<nm(b.c)?-1:1; });
+    document.querySelectorAll('.sb').forEach(function(b){ var on=b.getAttribute('data-sort')===SORT.k; b.classList.toggle('on',on); b.classList.toggle('asc',on&&SORT.dir===1); b.classList.toggle('desc',on&&SORT.dir===-1); b.setAttribute('aria-sort',on?(SORT.dir===1?'ascending':'descending'):'none'); });
+    var ordered=cmpRows.concat(other);
     var max=niceMax(Math.max.apply(null,rows.map(function(x){return x.hi||0;}).concat([C.hi||0,1])));
     var pct=function(v){ return Math.max(0,Math.min(100,v/max*100)); };
     $('axis').innerHTML=[0,.25,.5,.75,1].map(function(t){ return '<span style="left:'+t*100+'%">'+kfmt(Math.round(max*t))+'</span>'; }).join('');
     var band=C.lo!=null? '<i class="band" style="left:'+pct(C.lo)+'%;width:'+Math.max(.6,pct(C.hi)-pct(C.lo))+'%"></i>' : '';
     $('key').innerHTML=C.lo!=null? '<i class="kb"></i>developer\'s cost to build'+(C.partial?', priced elements only':'') : '';
-    $('tbl').innerHTML=rows.map(function(x){
+    $('tbl').innerHTML=ordered.map(function(x,i){
       var c=x.c, sel=c.id===state.cityId, isB=c.id==='cob', mark='';
       if(isB) mark='';
       else if(x.lo==null) mark='';
@@ -686,8 +701,9 @@ var ELIG = [
       else mark='<i class="rng" style="left:'+pct(x.lo)+'%;width:'+Math.max(.6,pct(x.hi)-pct(x.lo))+'%"></i>';
       var fee=isB?'Builds':x.lo==null?'n/a':rK(x.lo,x.hi), rev=isB?'$0':x.lo==null?'n/a':rK(x.lo*n,x.hi*n);
       var RL=sumLen(reqF(state)), pf=(isB||x.lo==null||!RL)?'–':rK(x.lo/RL,x.hi/RL), sh=isB?null:shareOf(x,C), pc=!sh?'–':(sh[0]===sh[1]?sh[0]+'%':sh[0]+'–'+sh[1]+'%');
-      return '<button type="button" class="trow'+(sel?' sel':'')+(c.group==='caution'?' caution':'')+'" data-city="'+c.id+'" aria-pressed="'+sel+'">'+
-        '<span class="tn"><b>'+esc(nm(c))+'</b>'+src(c.conf)+((!isB&&x.hi===0)?'<i>'+(c.id==='pdx'?'charges only local streets without curb':'no sidewalk owed')+'</i>':'')+'</span><span class="tf">'+fee+'</span><span class="tp">'+pf+'</span><span class="tc">'+pc+'</span><span class="tt">'+band+mark+'</span></button>';
+      var sep=(i===cmpRows.length&&other.length)?'<div class="tsep"><b>Not sorted</b> · not like-for-like with a fixed published rate</div>':'';
+      return sep+'<button type="button" class="trow'+(sel?' sel':'')+(c.group==='caution'?' caution':'')+'" data-city="'+c.id+'" aria-pressed="'+sel+'">'+
+        '<span class="tn"><b>'+esc(nm(c))+'</b>'+src(c.conf)+((!isB&&x.hi===0)?'<i>'+(c.id==='pdx'?'charges only local streets without curb':'no sidewalk owed')+'</i>':'')+(NOTCMP[c.id]?'<em class="why">'+NOTCMP[c.id]+'</em>':'')+'</span><span class="tf">'+fee+'</span><span class="tp">'+pf+'</span><span class="tc">'+pc+'</span><span class="tt">'+band+mark+'</span></button>';
     }).join('');
     $('tbl').querySelectorAll('[data-city]').forEach(function(b){ b.addEventListener('click',function(){ setCity(b.getAttribute('data-city')); }); });
   }
@@ -772,6 +788,7 @@ var ELIG = [
     $('copyCode').addEventListener('click',function(){ copy(code(),'shareMsg','Case code copied. Paste it into an email.'); });
     $('loadCode').addEventListener('click',function(){ try{ state=Object.assign(blank(),fromCode($('codeIn').value)); all(); $('shareMsg').textContent='Case loaded.'; }catch(e){ $('shareMsg').textContent='That code did not load. Check it was copied whole.'; } });
     $('addr').addEventListener('input',search);
+    document.querySelectorAll('.sb').forEach(function(b){ b.addEventListener('click',function(){ var k=b.getAttribute('data-sort'); if(SORT.k===k) SORT.dir=-SORT.dir; else { SORT.k=k; SORT.dir=(k==='name')?1:-1; } render(false); }); });
     $('goCost').addEventListener('click',function(){ $('dCost').open=true; $('dCost').scrollIntoView({behavior:'smooth'}); });
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
