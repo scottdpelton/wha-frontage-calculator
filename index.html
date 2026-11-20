@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frontage Fee-in-Lieu Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE work: a calculator for planners
+   IDEA a bench instrument: inputs on the left, readouts on the right, nothing else
+   PICTURE the readout grid and the all-cities table with a shared scale
+   COLOUR aluminium ground, white panels, black ink, one orange for the selected city
+   TYPE Geist 600 + Geist, tabular figures
+   LAYOUT laptop: 400px input column | readouts; phone: inputs, then readouts */
+:root{color-scheme:light dark;
+  --bg:light-dark(#e3e5e8,#121315);--panel:light-dark(#ffffff,#1c1e21);--ink:light-dark(#111214,#eceef0);
+  --muted:light-dark(#5b6067,#a0a6ad);--line:light-dark(#d4d6da,#2d3035);--soft:light-dark(#f3f4f5,#25272b);
+  --acc:light-dark(#e04400,#ff6a26);--acc-soft:light-dark(#ffe6da,#3a2016);--band:light-dark(#cfd2d6,#3a3e44);
+  --good:light-dark(#17703f,#5fcf8c);--bad:light-dark(#b0261c,#f08a82);--warn:light-dark(#8a5a00,#e5b54f)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 Geist,system-ui,-apple-system,'Segoe UI',sans-serif;overflow-x:clip}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+a{color:inherit}
+.top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px max(12px,2vw);background:var(--panel);border-bottom:1px solid var(--line)}
+h1{font-size:17px;font-weight:650;letter-spacing:-.01em;margin:0}
+.top div{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.app{display:grid;grid-template-columns:520px minmax(0,1fr);gap:12px;padding:12px max(12px,2vw);max-width:1500px;margin:0 auto;align-items:start}
+@media(min-width:981px){.rail{position:sticky;top:calc(var(--bar,60px) + 12px);max-height:calc(100vh - var(--bar,60px) - 24px);overflow-y:auto;scrollbar-width:thin;padding-right:2px}.rail .panel:last-child{margin-bottom:0}}
+@media(max-width:980px){.app{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:12px}
+h2{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 8px;text-transform:none}
+.muted{color:var(--muted)}
+.btn{padding:6px 11px;border-radius:6px;border:1px solid var(--line);background:var(--soft);cursor:pointer;font-size:14px;font-weight:500}
+.btn:hover{border-color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:default}
+/* lot + city pickers */
+.lots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.pick{text-align:left;border:1px solid var(--line);background:var(--soft);border-radius:6px;padding:7px 9px;cursor:pointer;display:flex;flex-direction:column}
+.pick b{font-weight:600;font-size:14px}.pick span{font-size:12.5px;color:var(--muted)}
+.pick:hover,.cbtn:hover{border-color:var(--ink)}
+.pick.on,.cbtn.on{background:var(--ink);border-color:var(--ink);color:var(--panel)}
+.pick.on span{color:inherit;opacity:.7}
+.look label{display:block;font-size:16px;font-weight:650;margin-bottom:6px}
+.look input{width:100%;padding:11px 12px;border:2px solid var(--acc);border-radius:8px;background:var(--panel);font-size:17px}
+.look input::placeholder{color:var(--muted)}
+#addrList{display:flex;flex-direction:column}
+#addrList button{text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:7px 4px;cursor:pointer}
+#addrList button:hover{background:var(--soft)}
+#addrMsg{font-size:13px;margin:4px 0 0}
+.citybar{position:sticky;top:0;z-index:5;display:flex;gap:10px;align-items:baseline;padding:8px max(12px,2vw);background:var(--panel);border-bottom:1px solid var(--line)}
+.cl{font-size:13px;color:var(--muted);white-space:nowrap;flex:none}
+#cityBtns{display:flex;flex-wrap:wrap;gap:6px 0;align-items:center}
+.grp{display:flex;gap:5px;align-items:center;padding:0 10px;border-left:1px solid var(--line)}
+.grp:first-child{padding-left:0;border-left:0}
+.gl{display:none}
+@media(max-width:760px){.cl{display:none}#cityBtns{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding-bottom:2px}.cbtn{white-space:nowrap}.grp,.cbtn{flex:none}}
+.cbtn{border:1px solid var(--line);background:var(--soft);border-radius:6px;padding:5px 9px;cursor:pointer;font-size:14px}
+.cbtn.caution{border-style:dashed}
+/* streets */
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-size:12.5px;font-weight:500;color:var(--muted);text-align:left;padding:4px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:4px;border-bottom:1px solid var(--line);vertical-align:middle}
+th.c,td.c{text-align:center;padding-inline:2px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td input[type=text],td input[type=number],td select,.fld input,.fld select{padding:5px 6px;border:1px solid var(--line);border-radius:5px;background:var(--soft);font-size:16px}
+#ft{table-layout:fixed;min-width:440px}#ft input[type=text],#ft input[type=number],#ft select{width:100%}#ft select{padding-inline:3px}
+#ft th,#ft td{padding-inline:3px}
+#ft th:nth-child(2){width:78px}#ft th:nth-child(3){width:90px}#ft th.c{width:42px}#ft th:last-child{width:28px}
+input[type=checkbox],input[type=radio]{width:17px;height:17px;accent-color:var(--acc)}
+.x{width:26px;height:26px;border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer}
+.x:hover{color:var(--bad)}
+.note{font-size:12.5px;color:var(--muted);margin:8px 0 0}
+.four{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.fld{display:block;font-size:12.5px}
+.fld>span:first-child{display:block;margin-bottom:3px;color:var(--muted)}
+.fld input,.fld select{width:100%}
+.fld em,td em{font-style:normal;font-size:12px;color:var(--acc);font-weight:600}
+.unit{display:flex;align-items:center;gap:5px}.unit i{font-style:normal;font-size:12.5px;color:var(--muted);white-space:nowrap}
+.rowb{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:8px;flex-wrap:wrap}
+/* readouts */
+#reading{border:2px solid var(--ink);padding:0;overflow:hidden}
+#reading>*:not(.title){margin-left:14px;margin-right:14px}
+#reading>.calc{margin-bottom:14px}
+#reading>.ref{margin-bottom:14px}
+.title{display:flex;gap:8px 20px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;background:var(--ink);color:var(--panel);padding:12px 14px;margin-bottom:14px}
+.title .tl{display:block;font-size:12.5px;opacity:.7}
+.title b{display:block;font-size:clamp(22px,2.6vw,28px);font-weight:650;letter-spacing:-.02em;line-height:1.1}
+.tr2{text-align:right;font-size:13.5px}
+.tr2 span{display:block}
+.tr2 #rLot{font-weight:600;font-size:15px}
+.title .src{color:inherit}
+.outs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.out{padding:10px 12px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--soft)}
+.out:nth-child(3n){border-right:0}.out:nth-last-child(-n+3){border-bottom:0}
+.out .l{font-size:13px;color:var(--muted)}
+.out .v{font-size:clamp(19px,2.1vw,25px);font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums;line-height:1.25;margin-top:1px}
+.out .s{font-size:12.5px;color:var(--muted);margin-top:2px}
+.out .s input{width:54px;padding:2px 5px;border:1px solid var(--line);border-radius:4px;background:var(--panel);font-size:14px;color:var(--ink)}
+.out.key{background:var(--acc-soft)}
+.link{border:0;background:none;padding:0;text-decoration:underline;cursor:pointer;color:inherit;font-size:inherit}
+@media(max-width:620px){.outs{grid-template-columns:repeat(2,minmax(0,1fr))}.out:nth-child(3n){border-right:1px solid var(--line)}.out:nth-child(2n){border-right:0}.out:nth-last-child(-n+3){border-bottom:1px solid var(--line)}.out:nth-last-child(-n+2){border-bottom:0}}
+.basis{margin-top:12px}
+.basis ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 18px;font-size:13.5px}
+@media(max-width:700px){.basis ul{grid-template-columns:minmax(0,1fr)}}
+.basis li{display:flex;gap:8px;align-items:baseline}
+.basis li::before{content:"";flex:none;width:9px;height:9px;border-radius:50%;background:var(--good);transform:translateY(-1px)}
+.basis li.w::before{background:var(--warn)}.basis li.b::before{background:var(--bad)}.basis li.n::before{background:var(--muted)}
+.basis b{font-weight:600}
+.out.dim .v{color:var(--muted)}
+.tn i{font-style:normal;font-size:12px;color:var(--muted);margin-left:6px}
+.calc{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin-top:12px;font-size:14px}
+.calc dt{color:var(--muted)}.calc dd{margin:0}
+pre{font:13.5px/1.55 ui-monospace,Menlo,Consolas,monospace;background:var(--soft);border-radius:6px;padding:8px 10px;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.ref{margin:10px 0 0;font-size:13px;color:var(--bad)}
+/* cities table */
+.trow,.thead,.taxis{display:grid;grid-template-columns:minmax(150px,1.3fr) 130px 96px 96px minmax(140px,1.6fr);gap:18px;align-items:center}
+.thead{font-size:12.5px;color:var(--muted);padding:0 10px 6px;border-bottom:1px solid var(--line)}
+.thead span:nth-child(n+2):nth-child(-n+4){text-align:right}
+.trow{width:100%;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;padding:10px;cursor:pointer;font-size:14.5px}
+.trow:hover{background:var(--soft)}
+.trow.sel{background:var(--acc-soft)}
+.tn b{display:block;font-weight:500;line-height:1.25}
+.trow.sel .tn b{font-weight:650}
+.trow.caution .tn b{text-decoration:line-through;text-decoration-thickness:1px}
+.tf,.tp,.tc,.tv{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tp,.tc{color:var(--muted)}
+.trow:nth-child(even):not(.sel){background:color-mix(in srgb,var(--soft) 55%,transparent)}
+.tf{font-weight:600}
+.tt{position:relative;height:18px;border-left:1px solid var(--muted)}
+.tt::after{content:"";position:absolute;left:0;right:0;top:50%;border-top:1px solid var(--line)}
+.band{position:absolute;top:0;bottom:0;background:var(--band);opacity:.6}
+.dot{position:absolute;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--ink);z-index:1}
+.rng{position:absolute;top:50%;height:5px;margin-top:-2.5px;border-radius:3px;background:var(--ink);z-index:1}
+.trow.sel .dot,.trow.sel .rng{background:var(--acc)}
+.tb{container:tb/inline-size}
+.taxis{padding:3px 10px 0}
+.ax{position:relative;height:16px;font-size:12px;color:var(--muted)}
+.ax span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.ax span:first-child{transform:none}.ax span:last-child{transform:translateX(-100%)}
+.key2{font-size:12.5px;color:var(--muted);margin:6px 0 0}
+.kb{display:inline-block;width:16px;height:9px;background:var(--band);border-radius:2px;vertical-align:middle;margin-right:5px}
+.src{font-size:12px;font-weight:600;white-space:nowrap}
+.s-pub{color:var(--good)}.s-cost{color:var(--muted)}.s-mid{color:var(--warn)}.s-ill{color:var(--acc)}.s-bad{color:var(--bad)}.s-base{color:var(--muted)}
+@container tb (max-width:680px){.trow,.thead,.taxis{grid-template-columns:minmax(130px,1.4fr) 120px 88px 92px;gap:14px}.tt,.thead span:nth-child(5),.taxis,.key2{display:none}}
+@container tb (max-width:440px){.trow,.thead{grid-template-columns:minmax(0,1.2fr) 104px 78px;gap:10px}.tc,.thead span:nth-child(4){display:none}}
+/* folded */
+.wide{grid-column:1/-1}
+details{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin-bottom:8px}
+summary{cursor:pointer;padding:10px 14px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+";font-weight:600;width:12px;flex:none}
+details[open]>summary::before{content:"–"}
+summary b{font-weight:600}
+summary span{color:var(--muted);font-size:13.5px}
+.body{padding:0 14px 14px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 14px;margin-top:10px}
+@media(max-width:700px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+fieldset{border:0;border-top:1px solid var(--line);padding:10px 0 0;margin:12px 0 0}
+legend{font-size:13px;color:var(--muted);padding:0 6px 0 0}
+.chk{display:flex;gap:8px;align-items:flex-start;margin:6px 0}
+.chk input{margin-top:2px;flex:none}
+.verdict{margin-top:8px;padding:8px 10px;border-radius:6px;font-weight:600}
+.v-yes{background:color-mix(in srgb,var(--good) 14%,transparent);color:var(--good)}
+.v-no{background:color-mix(in srgb,var(--bad) 14%,transparent);color:var(--bad)}
+.v-unk{background:var(--soft);color:var(--muted)}
+#rates{min-width:720px}#rates td small{display:block;color:var(--muted);font-size:12.5px}#rates input[type=number]{width:96px}
+#rates .srcnote{display:block;width:100%;margin:3px 0 0;font-size:13px}
+#rates tr.off{color:var(--muted)}#rates tr.on td:first-child b{box-shadow:inset 0 -2px var(--acc)}
+textarea{width:100%;min-height:56px;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--soft);font:12.5px ui-monospace,Menlo,monospace}
+footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>Frontage fee-in-lieu calculator</h1>
+  <div><span class="muted" id="copyMsg" role="status" style="font-size:13px"></span><button type="button" class="btn" id="copySum">Copy result</button><button type="button" class="btn" id="resetAll">Reset</button></div>
+</div>
+<div class="citybar"><span class="cl">Apply the rules of</span><div id="cityBtns"></div></div>
+<div class="app">
+  <div class="rail">
+    <section class="panel">
+      <div class="look">
+        <label for="addr">Look up any Bellingham address</label>
+        <input id="addr" type="text" placeholder="Type an address, e.g. 3605 Mill Ave" autocomplete="off" spellcheck="false">
+        <div id="addrList"></div><p class="muted" id="addrMsg" role="status"></p>
+      </div>
+      <h2 style="margin-top:14px">or use a documented case</h2>
+      <div class="lots" id="lotBtns"></div>
+    </section>
+    <section class="panel">
+      <h2>Streets on the lot <span style="font-weight:400">· tick what exists</span></h2>
+      <div class="scroll"><table id="ft"><thead><tr><th>Street</th><th>Feet</th><th>Class</th><th class="c" title="Paved">Pave</th><th class="c" title="Curb and gutter">Curb</th><th class="c" title="Sidewalk">Walk</th><th class="c" title="Frontage work required">Req'd</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="four">
+        <label class="fld"><span>Ramps</span><input id="ramps" type="number" min="0" step="1"></label>
+        <label class="fld"><span>Lights</span><input id="lights" type="number" min="0" step="1"></label>
+        <label class="fld"><span>Curb ext.</span><input id="curbExt" type="number" min="0" step="1"></label>
+        <label class="fld"><span>Alley, sq ft</span><input id="alleySf" type="number" min="0" step="10"></label>
+      </div>
+      <div class="rowb"><button type="button" class="btn" id="addFront">Add street</button><span class="muted" id="sLot" style="font-size:12.5px"></span></div>
+      <p class="note" id="caseNote"></p>
+    </section>
+  </div>
+
+  <div>
+    <section class="panel" id="reading" aria-live="polite">
+      <div class="title"><div><span class="tl">Result under the rules of</span><b id="rHead"></b></div><div class="tr2"><span id="rLot"></span><span id="mMeta"></span></div></div>
+      <div class="outs">
+        <div class="out key"><div class="l">Fee for this lot</div><div class="v" id="rFee"></div><div class="s" id="rFeeS"></div></div>
+        <div class="out"><div class="l">Fee per frontage foot</div><div class="v" id="rPerFt"></div><div class="s" id="rPerFtS"></div></div>
+        <div class="out" id="oSave"><div class="l">Developer saves vs building</div><div class="v" id="rSave"></div><div class="s" id="rSaveS"></div></div>
+        <div class="out" id="oCost"><div class="l">Cost to build, developer</div><div class="v" id="rCost"></div><div class="s"><span id="rCostS"></span> <button type="button" class="link" id="goCost">Unit costs</button></div></div>
+        <div class="out" id="oPct"><div class="l">Fee as share of that cost</div><div class="v" id="rPct"></div><div class="s" id="rPctS"></div></div>
+        <div class="out" id="oGap"><div class="l">Shortfall the City covers</div><div class="v" id="rGap"></div><div class="s" id="rGapS"></div></div>
+      </div>
+      <div class="basis"><h2>What these numbers rest on</h2><ul id="basis"></ul></div>
+      <dl class="calc"><dt>Work owed</dt><dd id="lotScope"></dd><dt>Method</dt><dd id="mHow"></dd><dt>Fee covers</dt><dd id="mCovers"></dd><dt>Math</dt><dd><pre id="mMath"></pre></dd><dt>Source</dt><dd id="mSrc"></dd></dl>
+      <p class="ref" id="rRef" hidden></p>
+    </section>
+    <section class="panel">
+      <h2>Same lot under every city · click a row</h2>
+      <div class="tb">
+      <div class="thead"><span>City</span><span>Fee</span><span>Per ft</span><span>% of cost</span><span>Fee on one scale</span></div>
+      <div id="tbl"></div>
+      <div class="taxis"><span></span><span></span><span></span><span></span><div class="ax" id="axis"></div></div>
+      <p class="key2" id="key"></p>
+      </div>
+    </section>
+  </div>
+
+  <div class="wide">
+    <details id="dCity"><summary><b id="mName"></b><span>editable</span></summary><div class="body">
+      <div class="grid" id="mParams"></div>
+      <div class="grid" id="mExtra">
+        <label class="fld" data-for="hou atx"><span>Sidewalk width charged</span><span class="unit"><input id="width" type="number" min="0" step="0.5"><i>ft</i></span></label>
+        <label class="fld" data-for="atx"><span>Project type</span><select id="use"><option value="res">Residential</option><option value="mf">Multifamily</option><option value="com">Commercial</option></select></label>
+        <label class="fld" data-for="nash"><span>Construction value, for the 3% cap</span><span class="unit"><input id="constrValue" type="number" min="0" step="10000"><i>$</i></span></label>
+      </div>
+      <div id="paOpts" hidden>
+        <fieldset><legend>50 ft step applies (their page does not say)</legend>
+          <label class="chk"><input type="radio" name="step" value="frontage" id="stepF"> per street</label>
+          <label class="chk"><input type="radio" name="step" value="parcel" id="stepP"> once per parcel</label></fieldset>
+        <fieldset><legend>Higher rate tier applies when</legend>
+          <label class="chk"><input type="radio" name="paRead" value="scope" id="readS"> curb and gutter must be built</label>
+          <label class="chk"><input type="radio" name="paRead" value="curb" id="readC"> the street already has curb and gutter</label></fieldset>
+      </div>
+      <div class="rowb" style="justify-content:flex-start"><button type="button" class="btn" id="mReset" hidden>Restore published values</button></div>
+    </div></details>
+
+    <details id="dCost"><summary><b>Unit costs</b><span id="sCost"></span></summary><div class="body">
+      <div class="scroll"><table id="rates"><thead><tr><th>Element</th><th class="n">This lot</th><th>Low, $</th><th>High, $</th><th>Source</th></tr></thead><tbody></tbody></table></div>
+      <label class="fld" style="max-width:360px;margin-top:10px"><span>City's cost to build later, % above the developer's (sets the shortfall)</span><span class="unit"><input id="cityMarkup" type="number" min="0" step="5" placeholder="not set"><i>%</i></span></label>
+      <pre id="costLines" style="margin-top:10px"></pre>
+      <div class="rowb" style="justify-content:flex-start"><button type="button" class="btn" id="ratesReset">Restore sourced costs</button></div>
+    </div></details>
+
+    <details id="dElig"><summary><b>Pilot eligibility screen</b><span id="sElig"></span></summary><div class="body">
+      <div id="elig"></div>
+      <div id="eligOut" class="verdict"></div>
+    </div></details>
+
+    <details id="dShare"><summary><b>Share this setup</b><span>copy a code into an email</span></summary><div class="body">
+      <div class="rowb" style="justify-content:flex-start;margin-top:0"><button type="button" class="btn" id="copyCode">Copy code</button><span class="muted" id="shareMsg" role="status" style="font-size:13px"></span></div>
+      <textarea id="codeIn" placeholder="paste a code: HDIP4:..." aria-label="Paste a case code" style="margin-top:8px"></textarea>
+      <div class="rowb" style="justify-content:flex-start"><button type="button" class="btn" id="loadCode">Load code</button></div>
+    </div></details>
+  </div>
+  <footer>Working draft, Nov 2026, figures unverified. Illustration for HDIP Task Force discussion by the Whatcom Housing Alliance, a housing-advocacy organization. Not a City figure or a proposed rate. Other cities' rules are from their published codes; legal questions go to the City Attorney.</footer>
+</div>
+<div hidden><span id="lotBrief"></span><span id="rSent"></span><span id="howT"></span><span id="dLot"></span></div>
+<script>
+{
+/* ===== Frontage fee-in-lieu calculator: data, pure logic, UI ===== */
+'use strict';
+
+/* ---------- formatting ---------- */
+function usd(n){ if(n==null||isNaN(n)) return 'n/a'; return '$'+Math.round(n).toLocaleString('en-US'); }
+function usdR(lo,hi){ if(lo==null) return 'not priced'; return Math.round(lo)===Math.round(hi)? usd(lo) : usd(lo)+' to '+usd(hi); }
+function ft(n){ return (Math.round(n*10)/10).toLocaleString('en-US')+' ft'; }
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+/* ---------- confidence labels ---------- */
+var CONF = {
+  published:{t:'Published rate',c:'pub'},
+  cost:{t:'Cost-based',c:'cost'},
+  consultant:{t:'Consultant estimate',c:'mid'},
+  comparable:{t:'Comparable city',c:'mid'},
+  placeholder:{t:'Placeholder',c:'ill'},
+  unpriced:{t:'Not priced',c:'ill'},
+  unclear:{t:'Listing unclear',c:'ill'},
+  invalidated:{t:'Struck down 2023',c:'bad'},
+  builder:{t:'Builder-reported',c:'bad'},
+  baseline:{t:'Current practice',c:'base'}
+};
+function tag(k){ var c=CONF[k]||CONF.placeholder; return '<span class="tag t-'+c.c+'">'+c.t+'</span>'; }
+
+/* ---------- unit rates for "cost to build" (Bellingham has none published) ---------- */
+var RATE_DEFAULTS = {
+  sidewalk:{label:'Sidewalk (5 ft concrete)',unit:'per ft of frontage',lo:60,hi:243,conf:'comparable',
+    src:'Comparable cities, not Bellingham. Low: Houston sets its $12/sq ft fee from City sidewalk costs ($60/ft at 5 ft). High: Nashville NDOT reported $243/ft average.'},
+  curbGutter:{label:'Curb and gutter',unit:'per ft of frontage',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
+  paving:{label:'Street paving to three-quarter standard',unit:'per ft of frontage',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
+  ramp:{label:'Curb ramp',unit:'each',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
+  light:{label:'Street light',unit:'each',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
+  curbExt:{label:'Curb extension at an intersection',unit:'each',lo:10000,hi:20000,conf:'consultant',
+    src:'AVT Consulting estimate for 2729 Peabody St (HDIP-0003 intake). Staff later removed the requirement.'},
+  alley:{label:'Alley widening',unit:'per sq ft',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
+  storm:{label:'Stormwater for new street area',unit:'allowance per case',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works allowance.'}
+};
+var RATE_ORDER = ['sidewalk','curbGutter','paving','ramp','light','curbExt','alley','storm'];
+
+/* ---------- pure logic ---------- */
+function reqF(s){ return s.frontages.filter(function(f){ return f.req && f.len>0; }); }
+function needWalk(s){ return reqF(s).filter(function(f){ return !f.walk; }); }
+function sumLen(a){ return a.reduce(function(t,f){ return t+f.len; },0); }
+
+function quantities(s){
+  var R=reqF(s);
+  return {
+    sidewalk: sumLen(R.filter(function(f){return !f.walk;})),
+    curbGutter: sumLen(R.filter(function(f){return !f.curb;})),
+    paving: sumLen(R.filter(function(f){return !f.paved;})),
+    ramp: s.ramps||0, light: s.lights||0, curbExt: s.curbExt||0,
+    alley: s.alleySf||0,
+    storm: R.some(function(f){return !f.paved;}) ? 1 : 0
+  };
+}
+function costToBuild(s){
+  var q=quantities(s), lo=0, hi=0, items=[], unpriced=[], any=false;
+  RATE_ORDER.forEach(function(k){
+    var r=s.rates[k], n=q[k]; if(!n) return;
+    var priced = r.lo!=null && r.hi!=null;
+    var it={k:k,label:r.label,qty:n,unit:r.unit,priced:priced,lo:priced?r.lo*n:null,hi:priced?r.hi*n:null};
+    items.push(it);
+    if(priced){ lo+=it.lo; hi+=it.hi; any=true; } else unpriced.push(r.label);
+  });
+  return {items:items, lo:any?lo:null, hi:any?hi:null, unpriced:unpriced, partial:unpriced.length>0};
+}
+function tier(len, first, rest, step){ return Math.min(len,step)*first + Math.max(0,len-step)*rest; }
+
+/* Each city: fn(s,P,C) -> {fee, lo, hi, lines[], notes[]} ; fee may be a range via lo/hi */
+var CITIES = [
+ {id:'cob', name:'Bellingham today', place:'Build it', group:'base', conf:'baseline', asof:'Current practice',
+  how:'No fee option. The developer builds the required frontage.',
+  covers:'Everything in the required scope.',
+  params:[], src:[],
+  fn:function(s,P,C){ return {fee:0, lo:0, hi:0, build:true, lines:['No fee. Developer builds the scope.','Cost to build (priced items): '+usdR(C.lo,C.hi)+(C.partial?' plus unpriced items':'')]}; }},
+
+ {id:'pa', name:'Port Angeles, WA', group:'wa', conf:'published', asof:'Effective April 1, 2026',
+  how:'Per foot of frontage, stepped at 50 ft. Higher tier when curb and gutter are part of the work. Plus a fee per ramp.',
+  covers:'Sidewalk, curb and gutter, ramps. Not paving, lights or stormwater.',
+  params:[{k:'hiFirst',l:'With curb and gutter, first 50 ft',v:100,u:'$/ft'},{k:'hiRest',l:'With curb and gutter, beyond 50 ft',v:60,u:'$/ft'},
+          {k:'loFirst',l:'Sidewalk only, first 50 ft',v:50,u:'$/ft'},{k:'loRest',l:'Sidewalk only, beyond 50 ft',v:30,u:'$/ft'},
+          {k:'ramp',l:'Residential ramp',v:1000,u:'$ each'},{k:'step',l:'Step length',v:50,u:'ft'}],
+  src:[{t:'Port Angeles Sidewalk Fee in Lieu Program',u:'https://cityofpa.us/1438/Sidewalk-Fee-in-Lieu-Program'}],
+  fn:function(s,P){
+    var L=[], fee=0, F=needWalk(s);
+    var tierOf=function(f){ return (s.paReading==='curb' ? f.curb : !f.curb) ? 'hi':'lo'; };
+    if(s.step==='parcel'){
+      var hiL=sumLen(F.filter(function(f){return tierOf(f)==='hi';})), loL=sumLen(F.filter(function(f){return tierOf(f)==='lo';}));
+      var used=0, add=function(len,a,b){ var first=Math.max(0,Math.min(len,P.step-used)); used+=first; var v=first*a+(len-first)*b; return v; };
+      var vh=add(hiL,P.hiFirst,P.hiRest), vl=add(loL,P.loFirst,P.loRest);
+      if(hiL) L.push('Curb-and-gutter tier, '+ft(hiL)+' (step applied once to the parcel) = '+usd(vh));
+      if(loL) L.push('Sidewalk-only tier, '+ft(loL)+' = '+usd(vl));
+      fee=vh+vl;
+    } else F.forEach(function(f){
+      var t=tierOf(f), a=t==='hi'?P.hiFirst:P.loFirst, b=t==='hi'?P.hiRest:P.loRest, v=tier(f.len,a,b,P.step);
+      L.push(f.name+': '+ft(f.len)+' at '+(t==='hi'?'curb-and-gutter':'sidewalk-only')+' tier ($'+a+' first '+P.step+' ft, $'+b+' after) = '+usd(v));
+      fee+=v;
+    });
+    var r=(s.ramps||0)*P.ramp; L.push((s.ramps||0)+' ramp(s) x '+usd(P.ramp)+' = '+usd(r)); fee+=r;
+    if(!F.length) L.unshift('No required frontage lacks sidewalk, so no frontage fee.');
+    return {fee:fee,lo:fee,hi:fee,lines:L};
+  }},
+
+ {id:'sequim', name:'Sequim, WA', group:'wa', conf:'cost', asof:'Ord. 2024-035',
+  how:'Licensed engineer\'s cost estimate, escalated by the five-year average ENR index, compounded five years forward. Spent within 5 years or refunded with interest.',
+  covers:'Whatever the developer would have had to build.',
+  params:[{k:'enr',l:'Five-year average ENR escalation (placeholder)',v:3,u:'% a year'},{k:'yrs',l:'Years projected',v:5,u:'years'}],
+  src:[{t:'Sequim Municipal Code 20.30',u:'https://codepublishing.com/WA/Sequim/html/Sequim20/Sequim2030.html'}],
+  fn:function(s,P,C){
+    if(C.lo==null) return {fee:null,lo:null,hi:null,lines:['No priced elements, so no estimate to escalate.']};
+    var m=Math.pow(1+P.enr/100,P.yrs);
+    return {fee:C.lo*m,lo:C.lo*m,hi:C.hi*m,lines:['Cost to build (priced items) '+usdR(C.lo,C.hi),'x (1 + '+P.enr+'%)^'+P.yrs+' = x '+m.toFixed(3),'= '+usdR(C.lo*m,C.hi*m)+(C.partial?' (unpriced items missing)':'')]};
+  }},
+
+ {id:'wacost', name:'Everett, Renton, Ferndale, Auburn (WA)', group:'wa', conf:'cost', asof:'Current codes',
+  how:'Fee equals the estimated cost to build, from the applicant\'s engineer or a City estimate. Renton binds the approval for 5 years.',
+  covers:'The required frontage scope.',
+  params:[],
+  src:[{t:'Everett EMC 19.26.060',u:'https://everett.municipal.codes/EMC/19.26.060'},{t:'Renton RMC 4-9-060',u:'https://www.codepublishing.com/WA/Renton/html/Renton04/Renton0409/Renton0409060.html'}],
+  fn:function(s,P,C){ return {fee:C.lo,lo:C.lo,hi:C.hi,lines:['Fee = cost to build (priced items) = '+usdR(C.lo,C.hi)+(C.partial?' (unpriced items missing)':'')]}; }},
+
+ {id:'olympia', name:'Olympia, WA', group:'wa', conf:'unclear', asof:'Current fee chapter',
+  how:'Listed as "Sidewalk Fee-in-lieu (Per City Engineer Estimate)" at a per-foot amount, under the permit and inspection fee table. Confirm with Olympia before relying on it.',
+  covers:'Sidewalk.',
+  params:[{k:'rate',l:'Listed amount',v:77.39,u:'$/ft'}],
+  src:[{t:'Olympia Municipal Code 4.04',u:'https://codepublishing.com/WA/Olympia/html/Olympia04/Olympia0404.html'}],
+  fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x $'+P.rate+'/ft = '+usd(v)]}; }},
+
+ {id:'shelton', name:'Shelton, WA', group:'wa', conf:'published', asof:'Base set 2016, indexed',
+  how:'Frontage improvement charge in the neighborhood residential zone. Base fee set at $0 per foot in 2016 and indexed to the Seattle construction cost index, so it stays $0. In effect, a waiver.',
+  covers:'Pedestrian projects on the six-year TIP, if any revenue.',
+  params:[{k:'rate',l:'Charge',v:0,u:'$/ft'}],
+  src:[{t:'Shelton Municipal Code 12.36',u:'https://www.codepublishing.com/WA/Shelton/html/Shelton12/Shelton1236.html'}],
+  fn:function(s,P){ var L=sumLen(reqF(s)), v=L*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' of required frontage x $'+P.rate+'/ft = '+usd(v)]}; }},
+
+ {id:'pdx', name:'Portland, OR (LTIC)', group:'us', conf:'published', asof:'$796/ft from July 1, 2026',
+  how:'Per foot of frontage on local streets without a curb, in single-dwelling zones. Arterials and curbed streets are not charged. ADUs are exempt.',
+  covers:'Pooled for local street projects.',
+  params:[{k:'rate',l:'Charge',v:796,u:'$/ft'},{k:'cap',l:'Cap on charged frontage (0 = none)',v:0,u:'ft'}],
+  src:[{t:'Portland LTIC',u:'https://www.portland.gov/transportation/permitting/ltic'},{t:'Portland TRN-3.450 fee schedule',u:'https://www.portland.gov/transportation/documents/trn-3450-exhibit-c-fees-rates-and-charges-transportation-development-0/download'}],
+  fn:function(s,P){
+    var F=reqF(s).filter(function(f){return f.cls==='local' && !f.curb;}), L=sumLen(F), c=P.cap>0?Math.min(L,P.cap):L, v=c*P.rate;
+    var lines=[ft(c)+' of uncurbed local frontage x $'+P.rate+'/ft = '+usd(v)];
+    var skipped=reqF(s).filter(function(f){return !(f.cls==='local' && !f.curb);});
+    if(skipped.length) lines.push('Not charged: '+skipped.map(function(f){return f.name+(f.curb?' (has curb)':' (arterial)');}).join(', '));
+    return {fee:v,lo:v,hi:v,lines:lines};
+  }},
+
+ {id:'tampa', name:'Tampa, FL', group:'us', conf:'published', asof:'Form revised Oct 2026',
+  how:'Per foot of frontage where sidewalk is required but "not practical" (grand tree, drainage ditch, unique circumstances, or an unsidewalked residential neighborhood).',
+  covers:'Sidewalk trust fund.',
+  params:[{k:'rate',l:'Charge',v:220,u:'$/ft'}],
+  src:[{t:'Tampa Sidewalk In-Lieu Fee application',u:'https://www.tampa.gov/sites/default/files/document/2026/sidewalk-in-lieu-form-updated-07-13-2026-rev10.26.26_ada.pdf'}],
+  fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x $'+P.rate+'/ft = '+usd(v)]}; }},
+
+ {id:'hou', name:'Houston, TX', group:'us', conf:'published', asof:'Current',
+  how:'Per square foot of the sidewalk that would have been required. The City Engineer sets the rate from City sidewalk project costs.',
+  covers:'Sidewalk only.',
+  params:[{k:'rate',l:'Charge',v:12,u:'$/sq ft'}],
+  src:[{t:'Houston Fee in Lieu of Sidewalk Construction',u:'https://houstontx.gov/planning/sidewalk-fee-in-lieu.html'}],
+  fn:function(s,P){ var L=sumLen(needWalk(s)), a=L*s.width, v=a*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x '+s.width+' ft wide = '+Math.round(a).toLocaleString()+' sq ft x $'+P.rate+' = '+usd(v)]}; }},
+
+ {id:'atx', name:'Austin, TX', group:'us', conf:'published', asof:'Current (page undated)',
+  how:'Per square foot of sidewalk, by use: residential, multifamily, commercial.',
+  covers:'Sidewalk, spent under the Sidewalk Plan.',
+  params:[{k:'res',l:'Residential',v:7.5,u:'$/sq ft'},{k:'mf',l:'Multifamily',v:18,u:'$/sq ft'},{k:'com',l:'Commercial',v:24,u:'$/sq ft'}],
+  src:[{t:'Austin sidewalk fee in lieu',u:'https://austintexas.gov/node/89130'}],
+  fn:function(s,P){ var r=P[s.use]||P.res, L=sumLen(needWalk(s)), a=L*s.width, v=a*r; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x '+s.width+' ft = '+Math.round(a).toLocaleString()+' sq ft x $'+r+' ('+({res:'residential',mf:'multifamily',com:'commercial'})[s.use]+') = '+usd(v)]}; }},
+
+ {id:'brook', name:'Brookhaven, GA', group:'us', conf:'published', asof:'Page updated 2019',
+  how:'Flat payment into the sidewalk fund per foot of frontage.',
+  covers:'Sidewalk fund.',
+  params:[{k:'rate',l:'Charge',v:50,u:'$/ft'}],
+  src:[{t:'Brookhaven sidewalk requirements',u:'https://www.brookhavenga.gov/sites/default/files/fileattachments/community_development/page/18742/sidewalks.pdf'}],
+  fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x $'+P.rate+'/ft = '+usd(v)]}; }},
+
+ {id:'nash', name:'Nashville, TN', group:'caution', conf:'invalidated', asof:'Enforcement stopped May 2023',
+  how:'Per foot, set yearly below the City\'s average sidewalk cost ($186/ft in 2020-21), capped at 3% of construction value. The Sixth Circuit held it failed the Nollan/Dolan test in Knight v. Metro (2023). Shown as a caution.',
+  covers:'Pedestrian benefit fund.',
+  params:[{k:'rate',l:'Charge (2020-21)',v:186,u:'$/ft'},{k:'capPct',l:'Cap, share of construction value',v:3,u:'%'}],
+  src:[{t:'Knight v. Metro Nashville (district court record)',u:'https://www.govinfo.gov/content/pkg/USCOURTS-tnmd-3_20-cv-00922/pdf/USCOURTS-tnmd-3_20-cv-00922-0.pdf'},{t:'Infinium Builders v. Metro Nashville (2025)',u:'https://app.midpage.ai/case/infinium-builders-llc-v-metropolitan-11117294'}],
+  fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate, lines=[ft(L)+' x $'+P.rate+'/ft = '+usd(v)];
+    if(s.constrValue>0){ var cap=s.constrValue*P.capPct/100; if(v>cap){ lines.push('Capped at '+P.capPct+'% of '+usd(s.constrValue)+' = '+usd(cap)); v=cap; } else lines.push('Under the cap of '+usd(cap)); }
+    else lines.push('No construction value entered, so the 3% cap is not applied.');
+    return {fee:v,lo:v,hi:v,lines:lines}; }}
+];
+
+/* fee that tracks cost (cost-based cities) is paired low-with-low; a fixed fee is compared across the cost range */
+function tracks(r){ return r.lo!=null && r.hi!=null && Math.round(r.lo)!==Math.round(r.hi); }
+function gapOf(r,C){ if(C.lo==null||r.lo==null) return null; return tracks(r)? [Math.max(0,C.lo-r.lo),Math.max(0,C.hi-r.hi)] : [Math.max(0,C.lo-r.hi),Math.max(0,C.hi-r.lo)]; }
+function shareOf(r,C){ if(C.lo==null||!C.lo||r.lo==null) return null; var a,b; if(tracks(r)){ a=r.lo/C.lo; b=r.hi/C.hi; } else { a=r.lo/C.hi; b=r.hi/C.lo; } a=Math.round(a*100); b=Math.round(b*100); return [Math.min(a,b),Math.max(a,b)]; }
+var CITY = {}; CITIES.forEach(function(c){ CITY[c.id]=c; });
+var GROUPS = [['base','Baseline'],['wa','Washington'],['us','Other US cities'],['caution','Cautionary']];
+
+function cityParams(s,c){ var P={}; c.params.forEach(function(p){ var o=s.cityOv[c.id]; P[p.k]=(o&&o[p.k]!=null)?o[p.k]:p.v; }); return P; }
+function runCity(s,c,C){ C=C||costToBuild(s); var r=c.fn(s,cityParams(s,c),C); r.C=C; return r; }
+
+/* ---------- case library ---------- */
+function F(name,len,cls,paved,curb,walk,req){ return {name:name,len:len,cls:cls,paved:paved,curb:curb,walk:walk,req:req}; }
+var CASES = {
+  hdip3:{label:'HDIP-0003: 2729 Peabody St (documented scope)', hypo:false,
+    note:'Sources: pre-application letter PRE2024-0067, the Final Decision, plan set PFC2025-0030, and the AVT intake. 10,000 sq ft lot, short plat into 4 small lots with 4 ADUs. Required: a 5 ft setback sidewalk, street trees and one ramp on W Maryland St, where curb and gutter already exist; Peabody St already has sidewalk. Alley widening to 15 ft is also required; its area is not in the file, so enter it if known. The late curb extension (AVT estimate $10,000 to $20,000) was removed by staff; set it to 1 to see its effect. No engineer\'s estimate is in the file.',
+    frontages:[F('W Maryland St',100,'local',true,true,false,true),F('Peabody St (sidewalk exists)',100,'local',true,false,true,false)],
+    ramps:1, lights:0, curbExt:0, alleySf:0, use:'res', units:8, constrValue:0, elig:{connects:true}},
+  hdip4:{label:'HDIP-0004: 3605 Mill Ave (edge case, cost unverified)', hypo:false,
+    note:'Sources: pre-application letter PRE2026-0058 and the October 28 case brief. Frontage lengths are City GIS parcel edges. 36th St and Samish Way are unimproved: no paving, curb, gutter or sidewalk. Samish Way also needs a street light. The builder reported $500,000 to $1,000,000 for the work; that figure is unverified and is shown for reference only, not used in any rate.',
+    frontages:[F('36th St',149.48,'local',false,false,false,true),F('Samish Way',154.17,'arterial',false,false,false,true),F('Mill Ave (improved)',24.81,'local',true,true,true,false)],
+    ramps:1, lights:1, curbExt:0, alleySf:0, use:'res', units:1, constrValue:0, reported:[500000,1000000], elig:{}},
+  hdip4b:{label:'HDIP-0004 if Samish Way is dropped', hypo:false,
+    note:'As HDIP-0004, with Samish Way not required, per the November 17 Task Force discussion (staff to confirm in writing). Builder-reported cost covered both streets.',
+    frontages:[F('36th St',149.48,'local',false,false,false,true),F('Samish Way (not required)',154.17,'arterial',false,false,false,false),F('Mill Ave (improved)',24.81,'local',true,true,true,false)],
+    ramps:1, lights:0, curbExt:0, alleySf:0, use:'res', units:1, constrValue:0, reported:[500000,1000000], elig:{}},
+  custom:{label:'Your own lot', hypo:true,
+    note:'Enter your own frontages. Tick what already exists on each street; the required work and every city\'s fee follow from that.',
+    frontages:[F('Street 1',50,'local',true,false,false,true)], ramps:0, lights:0, curbExt:0, alleySf:0, use:'res', units:2, constrValue:0, elig:{}}
+};
+var CASE_ORDER=['hdip3','hdip4','hdip4b','custom'];
+
+var ELIG = [
+  {k:'island',t:'Island: no improved frontage within 200 ft on either side, and none in the six-year plan',pos:true},
+  {k:'cityproj',t:'The frontage is in a City project expected within a set number of years',pos:true},
+  {k:'practical',t:'The work needs substantial off-site changes or creates a hazard',pos:true},
+  {k:'disprop',t:'Required frontage cost exceeds a share of project value staff set',pos:true},
+  {k:'connects',t:'Frontage connects to improved neighbors (excluded)',pos:false},
+  {k:'critical',t:'Safe route to school or ADA-critical segment (excluded)',pos:false}
+];
+
+/* ---------- UI v4: lot -> city -> reading -> all cities; adjustments folded ---------- */
+(function(){
+  var $=function(id){ return document.getElementById(id); };
+  var STORE='hdip-fil-v4', state;
+  var LOT={
+    hdip3:['2729 Peabody St','HDIP-0003, documented scope','Four small lots with four ADUs. Staff required a sidewalk and one ramp on W Maryland St, where curb and gutter already exist.'],
+    hdip4:['3605 Mill Ave','HDIP-0004, the edge case','One home on a corner lot with two unimproved streets, one of them an arterial. The builder did not proceed.'],
+    hdip4b:['3605 Mill Ave, 36th St only','HDIP-0004 if Samish Way is dropped','The same lot with Samish Way not required, as discussed at the November 17 Task Force (staff to confirm).'],
+    custom:['Your own lot','Enter any streets and lengths','Describe the lot under "Edit the lot" below.']
+  };
+  var SHORT={cob:'Bellingham today',wacost:'Everett, Renton, Ferndale, Auburn',pdx:'Portland, OR'};
+  function nm(c){ return SHORT[c.id]||c.name; }
+  function src(k){ var c=CONF[k]||CONF.placeholder; return '<span class="src s-'+c.c+'">'+c.t+'</span>'; }
+  function freshRates(){ return JSON.parse(JSON.stringify(RATE_DEFAULTS)); }
+  function blank(){ return {caseId:'hdip3', cityId:'pa', cityOv:{}, rates:freshRates(), width:5, casesPerYear:4, cityMarkup:null, step:'frontage', paReading:'scope', elig:{}}; }
+  function loadCase(id){
+    var c=CASES[id]; if(!c) return; var r=state||blank();
+    state=Object.assign({},r,{brief:null, origin:id==='custom'?'manual':'docs', caseId:id, caseName:LOT[id][0], caseNote:c.note,
+      frontages:JSON.parse(JSON.stringify(c.frontages)), ramps:c.ramps, lights:c.lights, curbExt:c.curbExt, alleySf:c.alleySf,
+      use:c.use, constrValue:c.constrValue, reported:c.reported||null, elig:Object.assign({},c.elig)});
+  }
+  function save(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+  function restore(){ try{ var o=JSON.parse(localStorage.getItem(STORE)||'null'); if(o&&o.frontages&&o.rates&&CITY[o.cityId]){ state=Object.assign(blank(),o); RATE_ORDER.forEach(function(k){ if(!state.rates[k]) state.rates[k]=freshRates()[k]; }); return true; } }catch(e){} return false; }
+  function edited(){ if(state.caseId!=='custom' && !/ \(edited\)$/.test(state.caseName)) state.caseName+=' (edited)'; }
+
+  /* pickers */
+  function renderLots(){
+    $('lotBtns').innerHTML=CASE_ORDER.map(function(id){ return '<button type="button" class="pick'+(id===state.caseId?' on':'')+'" data-lot="'+id+'" aria-pressed="'+(id===state.caseId)+'"><b>'+esc(LOT[id][0])+'</b><span>'+esc(LOT[id][1])+'</span></button>'; }).join('');
+    $('lotBtns').querySelectorAll('[data-lot]').forEach(function(b){ b.addEventListener('click',function(){ var id=b.getAttribute('data-lot'); loadCase(id); renderLots(); renderLot(); render();  }); });
+    $('lotBrief').textContent=state.brief||LOT[state.caseId][2];
+  }
+  function renderCities(){
+    $('cityBtns').innerHTML=GROUPS.map(function(g){ return '<div class="grp"><span class="gl">'+g[1]+'</span>'+CITIES.filter(function(c){return c.group===g[0];}).map(function(c){ return '<button type="button" class="cbtn'+(c.id===state.cityId?' on':'')+(c.group==='caution'?' caution':'')+'" data-city="'+c.id+'" aria-pressed="'+(c.id===state.cityId)+'">'+esc(nm(c))+'</button>'; }).join('')+'</div>'; }).join('');
+    $('cityBtns').querySelectorAll('[data-city]').forEach(function(b){ b.addEventListener('click',function(){ setCity(b.getAttribute('data-city')); }); });
+  }
+  function setCity(id){ state.cityId=id; renderCities(); renderMethod(); render(); }
+
+
+  /* address lookup: a snapshot of the City's public parcel, street and sidewalk maps, shipped beside the page */
+  var LOTS=null, loading=null;
+  function tc(a){ return a.toLowerCase().replace(/\b[a-z]/g,function(c){return c.toUpperCase();}).replace(/\b(St|Ave|Rd|Dr|Ln|Ct|Pl|Way|Blvd|Pkwy)\b/g,'$1'); }
+  function getLots(){ if(LOTS) return Promise.resolve(LOTS); if(!loading){ $('addrMsg').textContent='Loading the address list…'; loading=fetch('lots.json').then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){ LOTS=j; $('addrMsg').textContent=''; return j; }).catch(function(){ loading=null; $('addrMsg').textContent='The address list did not load. Enter the lot by hand under "Edit the lot".'; throw 0; }); } return loading; }
+  function search(){
+    var qy=$('addr').value.trim().toUpperCase().replace(/\s+/g,' ');
+    if(qy.length<3){ $('addrList').innerHTML=''; $('addrMsg').textContent=''; return; }
+    getLots().then(function(j){
+      if($('addr').value.trim().toUpperCase().replace(/\s+/g,' ')!==qy) return;
+      var hits=[], L=j.lots; for(var i=0;i<L.length&&hits.length<8;i++){ if(L[i][0].indexOf(qy)===0) hits.push(i); }
+      if(hits.length<8) for(i=0;i<L.length&&hits.length<8;i++){ if(L[i][0].indexOf(qy)>0) hits.push(i); }
+      $('addrList').innerHTML=hits.map(function(h){ return '<button type="button" data-h="'+h+'">'+esc(tc(L[h][0]))+'</button>'; }).join('');
+      $('addrMsg').textContent=hits.length?'':'No match. Some lots (condos, new plats, lots with no street edge on the map) are not in the list.';
+      $('addrList').querySelectorAll('[data-h]').forEach(function(b){ b.addEventListener('click',function(){ pickLot(j,+b.getAttribute('data-h')); }); });
+    },function(){});
+  }
+  function pickLot(j,h){
+    var L=j.lots[h], name=tc(L[0]);
+    loadCase('custom');
+    state.caseName=name; state.origin='maps';
+    state.frontages=L[3].map(function(f){ var w=f[3]>0; return F((j.streets[f[0]]==='Unmapped right-of-way'?'Right-of-way with no mapped street':tc(j.streets[f[0]]))+(f[3]===2?' (sidewalk marked incomplete)':''),f[1],f[2]?'arterial':'local',!!f[4],false,w,!w); });
+    state.brief=name+', a first draft read from the City\'s public maps. Correct it under "Edit the lot".';
+    state.caseNote='From City maps, November 20, 2026. '+L[1].toLocaleString()+' sq ft'+(L[2]?', '+L[2]+' ft of alley':'')+'. Maps show sidewalks only: curb, ramps, lights and "Req\'d" are guesses to correct.';
+    $('addr').value=''; $('addrList').innerHTML=''; $('addrMsg').textContent='';
+    renderLots(); renderLot(); render();
+  }
+
+  /* lot editor */
+  function renderLot(){
+    $('caseNote').textContent=state.brief?state.caseNote:''; $('caseNote').hidden=!state.brief;
+    $('ft').querySelector('tbody').innerHTML=state.frontages.map(function(f,i){
+      return '<tr><td><input type="text" id="fn'+i+'" data-i="'+i+'" data-k="name" value="'+esc(f.name)+'" aria-label="Street name"></td>'+
+        '<td><input type="number" id="fl'+i+'" min="0" step="0.1" data-i="'+i+'" data-k="len" value="'+f.len+'" aria-label="Length in feet"></td>'+
+        '<td><select id="fc'+i+'" data-i="'+i+'" data-k="cls" aria-label="Street class"><option value="local"'+(f.cls==='local'?' selected':'')+'>Local</option><option value="arterial"'+(f.cls==='arterial'?' selected':'')+'>Arterial</option></select></td>'+
+        ['paved','curb','walk'].map(function(k){ return '<td class="c"><input type="checkbox" id="f'+k+i+'" data-i="'+i+'" data-k="'+k+'"'+(f[k]?' checked':'')+' aria-label="'+({paved:'Paved',curb:'Curb and gutter',walk:'Sidewalk'})[k]+' already exists"></td>'; }).join('')+
+        '<td class="c"><input type="checkbox" id="freq'+i+'" data-i="'+i+'" data-k="req"'+(f.req?' checked':'')+' aria-label="Work required on this street"></td>'+
+        '<td><button type="button" class="x" data-del="'+i+'" aria-label="Remove '+esc(f.name)+'">×</button></td></tr>';
+    }).join('');
+    $('ft').querySelectorAll('[data-k]').forEach(function(el){
+      el.addEventListener(el.type==='checkbox'||el.tagName==='SELECT'?'change':'input',function(){
+        var f=state.frontages[+el.getAttribute('data-i')], k=el.getAttribute('data-k');
+        f[k]= el.type==='checkbox'?el.checked : k==='len'?(parseFloat(el.value)||0) : el.value; edited(); render();
+      });
+    });
+    $('ft').querySelectorAll('[data-del]').forEach(function(b){ b.addEventListener('click',function(){ if(state.frontages.length<=1) return; state.frontages.splice(+b.getAttribute('data-del'),1); edited(); renderLot(); render(); }); });
+    $('addFront').disabled=state.frontages.length>=6;
+    ['ramps','lights','curbExt','alleySf','constrValue','width'].forEach(function(k){ $(k).value=state[k]; });
+    $('cityMarkup').value=state.cityMarkup==null?'':state.cityMarkup;
+    $('use').value=state.use;
+    $('elig').innerHTML=ELIG.map(function(e){ return '<label class="chk"><input type="checkbox" id="e_'+e.k+'" data-e="'+e.k+'"'+(state.elig[e.k]?' checked':'')+'> '+esc(e.t)+'</label>'; }).join('');
+    $('elig').querySelectorAll('[data-e]').forEach(function(x){ x.addEventListener('change',function(){ state.elig[x.getAttribute('data-e')]=x.checked; render(); }); });
+  }
+  function verdict(){
+    var pos=ELIG.some(function(e){return e.pos&&state.elig[e.k];}), neg=ELIG.some(function(e){return !e.pos&&state.elig[e.k];});
+    if(neg) return ['no','Would not qualify','An exclusion applies, so the frontage gets built and no fee is offered.'];
+    if(pos) return ['yes','Could qualify','Subject to written staff findings.'];
+    return ['unk','Not screened yet','Tick what staff have confirmed.'];
+  }
+
+  /* method */
+  function renderMethod(){
+    var c=CITY[state.cityId], P=cityParams(state,c);
+    $('mName').textContent=nm(c)+' rates'; $('howT').textContent='How '+nm(c)+' calculates it';
+    $('mMeta').innerHTML=src(c.conf)+' · '+esc(c.asof);
+    $('mHow').textContent=c.how; $('mCovers').textContent=c.covers;
+    $('mParams').innerHTML=c.params.length? c.params.map(function(p){
+      var ov=state.cityOv[c.id]&&state.cityOv[c.id][p.k]!=null;
+      return '<label class="fld"><span>'+esc(p.l)+(ov?' <em>edited</em>':'')+'</span><span class="unit"><input type="number" id="p_'+p.k+'" step="any" data-p="'+p.k+'" value="'+P[p.k]+'"><i>'+esc(p.u)+'</i></span></label>';
+    }).join('') : '<p class="muted">No rates of its own. '+(c.id==='cob'?'The developer builds the work.':'The fee follows the developer\'s cost to build.')+'</p>';
+    $('mParams').querySelectorAll('[data-p]').forEach(function(el){ el.addEventListener('input',function(){ var o=state.cityOv[c.id]=state.cityOv[c.id]||{}; var v=parseFloat(el.value); o[el.getAttribute('data-p')]=isNaN(v)?0:v; render(); }); el.addEventListener('change',renderMethod); });
+    $('mReset').hidden=!state.cityOv[c.id];
+    $('paOpts').hidden=c.id!=='pa'; var anyX=false; $('mExtra').querySelectorAll('[data-for]').forEach(function(l){ var on=l.getAttribute('data-for').split(' ').indexOf(c.id)>-1; l.hidden=!on; anyX=anyX||on; }); $('mExtra').hidden=!anyX;
+    $('mSrc').innerHTML=!c.src.length?'Current Bellingham practice.':c.src.map(function(x){ return '<a href="'+x.u+'" target="_blank" rel="noopener">'+esc(x.t)+'</a>'; }).join('<br>');
+  }
+
+  /* unit rates */
+  function renderRates(){
+    var q=quantities(state);
+    $('rates').querySelector('tbody').innerHTML=RATE_ORDER.map(function(k){
+      var r=state.rates[k], d=RATE_DEFAULTS[k], ed=(r.lo!==d.lo||r.hi!==d.hi||r.src!==d.src), qty=q[k];
+      var qtxt=!qty?'–':(r.unit.indexOf('sq ft')>-1? qty.toLocaleString()+' sq ft' : r.unit.indexOf('ft')>-1? ft(qty) : qty);
+      return '<tr class="'+(qty?'on':'off')+'"><td><b>'+esc(r.label)+'</b><small>'+esc(r.unit)+'</small></td><td class="n">'+qtxt+'</td>'+
+        '<td><input type="number" id="rl_'+k+'" min="0" step="any" data-r="'+k+'" data-f="lo" value="'+(r.lo==null?'':r.lo)+'" placeholder="not set" aria-label="'+esc(r.label)+' low"></td>'+
+        '<td><input type="number" id="rh_'+k+'" min="0" step="any" data-r="'+k+'" data-f="hi" value="'+(r.hi==null?'':r.hi)+'" placeholder="not set" aria-label="'+esc(r.label)+' high"></td>'+
+        '<td>'+src(ed?'placeholder':r.conf)+(ed?' <em>edited</em>':'')+'<input type="text" id="rs_'+k+'" class="srcnote" data-r="'+k+'" data-f="src" value="'+esc(r.src)+'" aria-label="'+esc(r.label)+' source"></td></tr>';
+    }).join('');
+    $('rates').querySelectorAll('[data-r]').forEach(function(el){
+      el.addEventListener('input',function(){ var r=state.rates[el.getAttribute('data-r')], f=el.getAttribute('data-f');
+        if(f==='src') r.src=el.value; else { var v=parseFloat(el.value); r[f]=isNaN(v)?null:v; if(r.lo!=null&&r.hi==null) r.hi=r.lo; if(r.hi!=null&&r.lo==null) r.lo=r.hi; }
+        render(false); });
+      el.addEventListener('change',renderRates);
+    });
+  }
+
+  /* numbers */
+  function diff(r,C){ if(!C||C.lo==null||r.lo==null) return null; return tracks(r)? [C.lo-r.lo,C.hi-r.hi] : [C.lo-r.hi,C.hi-r.lo]; }
+  function diffTxt(d,plus){ if(!d) return null; if(d[1]<=0) return 'None'; return usdR(Math.max(0,d[0]),d[1])+(plus?'+':''); }
+  function niceMax(v){ if(v<=0) return 1000; var p=Math.pow(10,Math.floor(Math.log10(v))), m=v/p; return (m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*p; }
+  function k1(v){ return v<1000?'$'+Math.round(v):v<100000?'$'+(v/1000).toFixed(1).replace(/\.0$/,'')+'k':v<1e6?'$'+Math.round(v/1000)+'k':'$'+(v/1e6).toFixed(2)+'M'; }
+  function rK(lo,hi){ return Math.round(lo)===Math.round(hi)?usd(lo):k1(lo)+'–'+k1(hi); }
+  function kfmt(v){ return v>=1000? '$'+(v/1000).toLocaleString('en-US',{maximumFractionDigits:1})+'k' : '$'+v; }
+
+  function renderTable(rows,C,n){
+    var max=niceMax(Math.max.apply(null,rows.map(function(x){return x.hi||0;}).concat([C.hi||0,1])));
+    var pct=function(v){ return Math.max(0,Math.min(100,v/max*100)); };
+    $('axis').innerHTML=[0,.25,.5,.75,1].map(function(t){ return '<span style="left:'+t*100+'%">'+kfmt(Math.round(max*t))+'</span>'; }).join('');
+    var band=C.lo!=null? '<i class="band" style="left:'+pct(C.lo)+'%;width:'+Math.max(.6,pct(C.hi)-pct(C.lo))+'%"></i>' : '';
+    $('key').innerHTML=C.lo!=null? '<i class="kb"></i>developer\'s cost to build'+(C.partial?', priced elements only':'') : '';
+    $('tbl').innerHTML=rows.map(function(x){
+      var c=x.c, sel=c.id===state.cityId, isB=c.id==='cob', mark='';
+      if(isB) mark='';
+      else if(x.lo==null) mark='';
+      else if(Math.round(x.lo)===Math.round(x.hi)) mark='<i class="dot" style="left:'+pct(x.lo)+'%"></i>';
+      else mark='<i class="rng" style="left:'+pct(x.lo)+'%;width:'+Math.max(.6,pct(x.hi)-pct(x.lo))+'%"></i>';
+      var fee=isB?'Builds':x.lo==null?'n/a':rK(x.lo,x.hi), rev=isB?'$0':x.lo==null?'n/a':rK(x.lo*n,x.hi*n);
+      var RL=sumLen(reqF(state)), pf=(isB||x.lo==null||!RL)?'–':rK(x.lo/RL,x.hi/RL), sh=isB?null:shareOf(x,C), pc=!sh?'–':(sh[0]===sh[1]?sh[0]+'%':sh[0]+'–'+sh[1]+'%');
+      return '<button type="button" class="trow'+(sel?' sel':'')+(c.group==='caution'?' caution':'')+'" data-city="'+c.id+'" aria-pressed="'+sel+'">'+
+        '<span class="tn"><b>'+esc(nm(c))+'</b>'+src(c.conf)+((!isB&&x.hi===0)?'<i>'+(c.id==='shelton'?'rate is set at $0':c.id==='pdx'?'charges only local streets without curb':'no sidewalk owed')+'</i>':'')+'</span><span class="tf">'+fee+'</span><span class="tp">'+pf+'</span><span class="tc">'+pc+'</span><span class="tt">'+band+mark+'</span></button>';
+    }).join('');
+    $('tbl').querySelectorAll('[data-city]').forEach(function(b){ b.addEventListener('click',function(){ setCity(b.getAttribute('data-city')); }); });
+  }
+
+  function render(full){
+    var s=state, c=CITY[s.cityId], C=costToBuild(s), r=runCity(s,c,C), n=s.casesPerYear||0, isB=c.id==='cob';
+    var m=s.cityMarkup, CC=(m!=null&&C.lo!=null)?{lo:C.lo*(1+m/100),hi:C.hi*(1+m/100)}:null;
+    var feeTxt=r.fee==null?'n/a':usdR(r.lo,r.hi), revTxt=isB?'$0':r.fee==null?'n/a':usdR(r.lo*n,r.hi*n);
+    var q=quantities(s), parts=[];
+    if(q.sidewalk) parts.push(ft(q.sidewalk)+' of sidewalk'); if(q.curbGutter) parts.push(ft(q.curbGutter)+' of curb and gutter'); if(q.paving) parts.push(ft(q.paving)+' of paving');
+    if(q.ramp) parts.push(q.ramp+' ramp'+(q.ramp>1?'s':'')); if(q.light) parts.push(q.light+' street light'+(q.light>1?'s':'')); if(q.curbExt) parts.push(q.curbExt+' curb extension'+(q.curbExt>1?'s':'')); if(q.alley) parts.push(q.alley.toLocaleString()+' sq ft of alley widening');
+    var scope=parts.length?parts.join(', '):'no frontage work';
+    $('lotScope').textContent=scope;
+    $('rHead').textContent=nm(c); $('rLot').textContent=s.caseName;
+    $('rFee').textContent=isB?'$0':feeTxt;
+    $('rSent').textContent=isB? 'Bellingham has no fee option today. The developer builds '+scope+' and the City collects nothing.'
+      : 'A one-time fee to the City, paid instead of building '+scope+'.'+(tracks(r)?' It is a range because this city sets the fee from the cost to build, and the unit costs here are a low and a high.':'')+(c.group==='caution'?' Nashville\'s program was ruled unconstitutional in 2023; it is shown as a caution, not a model.':c.conf==='unclear'?' Olympia\'s listing is ambiguous; confirm with Olympia before citing.':'');
+    var RL=sumLen(reqF(s)), sh=isB?null:shareOf(r,C);
+    $('rFeeS').textContent=isB?'no fee option; developer builds':'one-time, in place of building';
+    $('rPerFt').textContent=(isB||r.lo==null||!RL)?'n/a':usdR(r.lo/RL,r.hi/RL);
+    $('rPerFtS').textContent='over '+ft(RL)+' of frontage with work owed';
+    $('rCost').textContent=C.lo==null?'Not priced':usdR(C.lo,C.hi)+(C.partial?'+':'');
+    $('rCostS').textContent=C.partial?C.unpriced.length+' element'+(C.unpriced.length>1?'s':'')+' not priced.':'';
+    $('rPct').textContent=isB?'n/a':!sh?'Not known':(sh[0]===sh[1]?sh[0]+'%':sh[0]+'% to '+sh[1]+'%');
+    $('rPctS').textContent=isB?'':!sh?'needs a cost to build':C.partial?'overstated: cost is missing elements':'';
+    var sv=diffTxt(diff(r,C),C.partial);
+    $('rSave').textContent=isB?'$0':C.lo==null?'Not known':sv;
+    $('rSaveS').textContent=isB?'no fee option':C.lo==null?'needs a cost to build':c.conf==='cost'?'fee equals cost; saves time and bonding only':sv==='None'&&!isB?'fee is more than building':C.partial?'understated: cost is missing elements':''; $('oSave').classList.toggle('dim',C.lo==null);
+    var gp=CC?diffTxt(diff(r,CC),C.partial):null;
+    $('rGap').textContent=isB?'$0':CC?gp:'Not known';
+    $('rGapS').textContent=isB?'developer builds everything':CC?'City cost to build later ('+usdR(CC.lo,CC.hi)+') minus fee':'needs the City\'s cost to build; set under Unit costs';
+    var ref=$('rRef'); if(s.reported){ ref.hidden=false; ref.textContent='Builder-reported cost for this work: '+usd(s.reported[0])+' to '+usd(s.reported[1])+'. Unverified; not used above.'; } else ref.hidden=true;
+    $('mMath').textContent=r.lines.join('\n');
+    $('costLines').textContent=C.items.length? C.items.map(function(it){ return it.label+': '+(it.unit.indexOf('ft')>-1&&it.unit.indexOf('sq')<0?ft(it.qty):it.qty)+(it.priced?' x '+usdR(s.rates[it.k].lo,s.rates[it.k].hi)+' = '+usdR(it.lo,it.hi):'  (not priced)'); }).join('\n')+'\nDeveloper\'s cost, priced items: '+usdR(C.lo,C.hi)+'\nCity\'s cost to build later: '+(CC?usdR(CC.lo,CC.hi)+' (developer\'s cost + '+m+'%)':'not set') : 'No required work.';
+    var ed=/ \(edited\)$/.test(s.caseName), B=[];
+    var cf={published:['','published by the city'],cost:['w','set from cost to build, so only as good as the unit costs'],unclear:['w','listing is ambiguous; confirm with Olympia'],invalidated:['b','struck down in court, 2023'],baseline:['','current practice']}[c.conf]||['w',''];
+    B.push([s.cityOv[c.id]?'w':cf[0],'Fee rules',s.cityOv[c.id]?'edited by you':cf[1]]);
+    B.push(s.origin==='docs'?[ed?'w':'','Street lengths',ed?'City documents, then edited':'City documents and parcel map']:s.origin==='maps'?[ed?'w':'','Street lengths',ed?'City parcel map, then edited':'City parcel map']:['n','Street lengths','entered by you']);
+    B.push(s.origin==='docs'?[ed?'w':'','Curb, sidewalk, ramps',ed?'pre-application letter, then edited':'pre-application letter']:s.origin==='maps'?['w','Curb, sidewalk, ramps','sidewalk from City map; curb and ramps are guesses']:['n','Curb, sidewalk, ramps','entered by you']);
+    var np=C.items.filter(function(it){return it.priced;}).length;
+    B.push(C.lo==null?['b','Cost to build','no element priced']:C.partial?['w','Cost to build',np+' of '+C.items.length+' elements priced, from other cities']:['w','Cost to build','all elements priced; check sources']);
+    B.push(CC?['n','City cost to build later','your entry, +'+m+'%']:['b','City cost to build later','not set, so no shortfall']);
+    $('basis').innerHTML=B.map(function(x){ return '<li class="'+x[0]+'"><span><b>'+x[1]+':</b> '+esc(x[2])+'</span></li>'; }).join('');
+    $('oCost').classList.toggle('dim',C.lo==null); $('oPct').classList.toggle('dim',isB||!sh); $('oGap').classList.toggle('dim',!isB&&!CC);
+    var v=verdict(); $('eligOut').className='verdict v-'+v[0]; $('eligOut').textContent=v[1]+'. '+v[2];
+    /* folded-section status lines */
+    $('sLot').textContent=ft(sumLen(reqF(s)))+' with work owed';
+    $('sCost').textContent='developer '+(C.lo==null?'not priced':usdR(C.lo,C.hi)+(C.partial?'+':''))+' · City '+(CC?usdR(CC.lo,CC.hi):'not set');
+    $('sElig').textContent=v[1];
+    renderTable(CITIES.map(function(cc){ var rr=runCity(s,cc,C); return {c:cc,lo:rr.lo,hi:rr.hi}; }),C,n);
+    if(full!==false) renderRates();
+    save();
+  }
+  function reading(){
+    var c=CITY[state.cityId];
+    return nm(c)+' rules applied to '+state.caseName+'\nWork owed: '+$('lotScope').textContent+'\nFee for this lot: '+$('rFee').textContent+'\nFee per frontage foot: '+$('rPerFt').textContent+'\nDeveloper saves vs building: '+$('rSave').textContent+'\nCost to build, developer: '+$('rCost').textContent+' '+$('rCostS').textContent+'\nFee as share of that cost: '+$('rPct').textContent+'\nShortfall the City covers: '+$('rGap').textContent+' ('+$('rGapS').textContent+')\n\nMath:\n'+$('mMath').textContent+'\n\nIllustration for Task Force discussion. Not a City figure or a proposed rate.';
+  }
+  function code(){ return 'HDIP4:'+btoa(unescape(encodeURIComponent(JSON.stringify(state)))); }
+  function fromCode(t){ var x=String(t).trim().match(/^HDIP4:(.+)$/); if(!x) throw 0; var o=JSON.parse(decodeURIComponent(escape(atob(x[1])))); if(!o||!Array.isArray(o.frontages)||!o.frontages.length||o.frontages.length>6||!o.rates||!CITY[o.cityId]) throw 0; return o; }
+  function copy(t,el,msg){ var done=function(){ $(el).textContent=msg; }; try{ navigator.clipboard.writeText(t).then(done,function(){ fb(t); done(); }); }catch(e){ fb(t); done(); } }
+  function fb(t){ var a=document.createElement('textarea'); a.value=t; document.body.appendChild(a); a.select(); try{document.execCommand('copy');}catch(e){} a.remove(); }
+  function all(){ renderLots(); renderCities(); renderMethod(); renderLot(); render(); document.querySelectorAll('[name=step]').forEach(function(x){x.checked=x.value===state.step;}); document.querySelectorAll('[name=paRead]').forEach(function(x){x.checked=x.value===state.paReading;}); }
+
+  function bar(){ var b=document.querySelector('.citybar'); if(b) document.documentElement.style.setProperty('--bar',b.offsetHeight+'px'); }
+  function init(){
+    bar(); window.addEventListener('resize',bar); if(window.ResizeObserver){ var cro=new ResizeObserver(bar); cro.observe(document.querySelector('.citybar')); }
+    if(!restore()){ state=blank(); loadCase('hdip3'); }
+    all();
+    $('addFront').addEventListener('click',function(){ if(state.frontages.length>=6) return; state.frontages.push(F('Street '+(state.frontages.length+1),50,'local',true,false,false,true)); edited(); renderLot(); render(); });
+    ['ramps','lights','curbExt','alleySf','constrValue','width'].forEach(function(k){ $(k).addEventListener('input',function(){ state[k]=parseFloat($(k).value)||0; if(k!=='width'&&k!=='constrValue') edited(); render(); }); });
+    $('cityMarkup').addEventListener('input',function(){ var v=parseFloat($('cityMarkup').value); state.cityMarkup=isNaN(v)?null:v; render(false); });
+    $('use').addEventListener('change',function(){ state.use=$('use').value; render(); });
+    document.querySelectorAll('[name=step]').forEach(function(x){ x.addEventListener('change',function(){ state.step=x.value; render(); }); });
+    document.querySelectorAll('[name=paRead]').forEach(function(x){ x.addEventListener('change',function(){ state.paReading=x.value; render(); }); });
+    $('mReset').addEventListener('click',function(){ delete state.cityOv[state.cityId]; renderMethod(); render(); });
+    $('ratesReset').addEventListener('click',function(){ state.rates=freshRates(); state.cityMarkup=null; $('cityMarkup').value=''; render(); });
+    $('resetAll').addEventListener('click',function(){ state=null; state=blank(); loadCase('hdip3'); all(); $('copyMsg').textContent='Reset'; });
+    $('copySum').addEventListener('click',function(){ copy(reading(),'copyMsg','Copied'); });
+    $('copyCode').addEventListener('click',function(){ copy(code(),'shareMsg','Case code copied. Paste it into an email.'); });
+    $('loadCode').addEventListener('click',function(){ try{ state=Object.assign(blank(),fromCode($('codeIn').value)); all(); $('shareMsg').textContent='Case loaded.'; }catch(e){ $('shareMsg').textContent='That code did not load. Check it was copied whole.'; } });
+    $('addr').addEventListener('input',search);
+    $('goCost').addEventListener('click',function(){ $('dCost').open=true; $('dCost').scrollIntoView({behavior:'smooth'}); });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+
+}
+</script>
+</body>
+</html>
