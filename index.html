@@ -239,9 +239,9 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
     <details id="dCity"><summary><b id="mName"></b><span>editable</span></summary><div class="body">
       <div class="grid" id="mParams"></div>
       <div class="grid" id="mExtra">
-        <label class="fld" data-for="hou atx"><span>Sidewalk width charged</span><span class="unit"><input id="width" type="number" min="0" step="0.5"><i>ft</i></span></label>
+        <label class="fld" data-for="hou atx shelton"><span>Sidewalk width charged</span><span class="unit"><input id="width" type="number" min="0" step="0.5"><i>ft</i></span></label>
         <label class="fld" data-for="atx"><span>Project type</span><select id="use"><option value="res">Residential</option><option value="mf">Multifamily</option><option value="com">Commercial</option></select></label>
-        <label class="fld" data-for="nash"><span>Construction value, for the 3% cap</span><span class="unit"><input id="constrValue" type="number" min="0" step="10000"><i>$</i></span></label>
+        <label class="fld" data-for="nash puy"><span>Construction value, for the cap</span><span class="unit"><input id="constrValue" type="number" min="0" step="10000"><i>$</i></span></label>
       </div>
       <div id="paOpts" hidden>
         <fieldset><legend>50 ft step applies (their page does not say)</legend>
@@ -295,7 +295,7 @@ var CONF = {
   placeholder:{t:'Placeholder',c:'ill'},
   unpriced:{t:'Not priced',c:'ill'},
   unclear:{t:'Listing unclear',c:'ill'},
-  invalidated:{t:'Struck down 2023',c:'bad'},
+  invalidated:{t:'Not collected since 2023',c:'bad'},
   builder:{t:'Builder-reported',c:'bad'},
   baseline:{t:'Current practice',c:'base'}
 };
@@ -380,7 +380,7 @@ var CITIES = [
     return {fee:fee,lo:fee,hi:fee,lines:L};
   }},
 
- {id:'sequim', name:'Sequim, WA', group:'wa', conf:'cost', asof:'Ord. 2024-035',
+ {id:'sequim', name:'Sequim, WA', group:'wa', conf:'cost', asof:'Ord. 2024-035; no later amendment found (code published through Dec 2024)',
   how:'Licensed engineer\'s cost estimate, escalated by the five-year average ENR index, compounded five years forward. Spent within 5 years or refunded with interest.',
   covers:'Whatever the developer would have had to build.',
   params:[{k:'enr',l:'Five-year average ENR escalation (placeholder)',v:3,u:'% a year'},{k:'yrs',l:'Years projected',v:5,u:'years'}],
@@ -398,19 +398,31 @@ var CITIES = [
   src:[{t:'Everett EMC 19.26.060',u:'https://everett.municipal.codes/EMC/19.26.060'},{t:'Auburn ACC 12.64A.050',u:'https://auburn.municipal.codes/ACC/12.64A.050'},{t:'Renton RMC 4-9-060 (amount set by City fee schedule; not modeled)',u:'https://www.codepublishing.com/WA/Renton/html/Renton04/Renton0409/Renton0409060.html'}],
   fn:function(s,P,C){ return {fee:C.lo,lo:C.lo,hi:C.hi,lines:['Fee = cost to build (priced items) = '+usdR(C.lo,C.hi)+(C.partial?' (unpriced items missing)':'')]}; }},
 
- {id:'olympia', name:'Olympia, WA', group:'wa', conf:'unclear', asof:'Fee table effective Jan 1, 2024',
-  how:'Listed as "Sidewalk Fee-in-lieu (Per City Engineer Estimate)" at $77.39 per linear foot or part thereof, in the permit and inspection fee table (OMC 4.04.010). The code does not say when it applies. Confirm with Olympia before relying on it.',
+ {id:'olympia', name:'Olympia, WA', group:'wa', conf:'unclear', asof:'Fee table effective Jan 1, 2026 (Ord. 7447)',
+  how:'Listed as "Sidewalk Fee-in-lieu (Per City Engineer Estimate)" at $85.00 per linear foot or part thereof, in the engineering fee table (OMC 4.04.010, effective Jan 1, 2026; was $77.39 in 2024). The code does not say when it applies. Confirm with Olympia before relying on it.',
   covers:'Sidewalk.',
-  params:[{k:'rate',l:'Listed amount',v:77.39,u:'$/ft'}],
+  params:[{k:'rate',l:'Listed amount',v:85,u:'$/ft'}],
   src:[{t:'Olympia Municipal Code 4.04',u:'https://codepublishing.com/WA/Olympia/html/Olympia04/Olympia0404.html'}],
   fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x $'+P.rate+'/ft = '+usd(v)]}; }},
 
- {id:'shelton', name:'Shelton, WA', group:'wa', conf:'published', asof:'Base set 2016, indexed',
-  how:'Frontage improvement charge in the neighborhood residential zone. Base fee set at $0 per foot for 2016, then adjusted each year by the October-to-October change in the construction cost index. A $0 base indexed this way stays $0 unless the code is amended.',
-  covers:'Frontage improvements in the neighborhood residential zone, per the city public works design standards.',
-  params:[{k:'rate',l:'Charge',v:0,u:'$/ft'}],
-  src:[{t:'Shelton Municipal Code 12.36',u:'https://www.codepublishing.com/WA/Shelton/html/Shelton12/Shelton1236.html'}],
-  fn:function(s,P){ var L=sumLen(reqF(s)), v=L*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' of required frontage x $'+P.rate+'/ft = '+usd(v)]}; }},
+ {id:'shelton', name:'Shelton, WA', group:'wa', conf:'published', asof:'2026 master fee schedule, effective Jan 1, 2026',
+  how:'Unit fees in lieu of right-of-way work, set from average costs on recent City capital projects: $8.00 per sq ft of sidewalk and $25.00 per ft of curb and gutter. Separate per-sq-ft fees for chip seal, asphalt and base rock are not modeled here. The 2024 code change (Ord. 2020-0224) moved the base fee into the master fee schedule; the old $0/ft base no longer applies.',
+  covers:'Sidewalk and curb and gutter. Paving fees exist but are not modeled.',
+  params:[{k:'walk',l:'Sidewalk',v:8,u:'$/sq ft'},{k:'cg',l:'Curb and gutter',v:25,u:'$/ft'}],
+  src:[{t:'Shelton 2026 Master Fee Schedule, Res. 1408-1025 (scanned PDF)',u:'https://cms8.revize.com/revize/sheltonwa/finance/Master%20Fee%20Schedules/2026/Resolution%20No.%201408-1025%202026%20Master%20Fee%20Schedule_20251202.pdf'},{t:'Shelton Municipal Code 12.36',u:'https://www.codepublishing.com/WA/Shelton/html/Shelton12/Shelton1236.html'}],
+  fn:function(s,P){ var W=sumLen(needWalk(s)), a=W*s.width, vw=a*P.walk, C=sumLen(reqF(s).filter(function(f){return !f.curb;})), vc=C*P.cg, v=vw+vc;
+    return {fee:v,lo:v,hi:v,lines:[ft(W)+' x '+s.width+' ft = '+Math.round(a).toLocaleString()+' sq ft sidewalk x $'+P.walk+' = '+usd(vw),ft(C)+' without curb x $'+P.cg+'/ft curb and gutter = '+usd(vc)]}; }},
+
+ {id:'puy', name:'Puyallup, WA', group:'wa', conf:'published', asof:'Fee schedule dated Jan 16, 2026; CCI-adjusted yearly',
+  how:'Per foot of required frontage for residential infill lots and commercial tenant improvements: $243.15/ft where there is no concrete curb, $121.57/ft where curb exists. Capped at 15% of project valuation. Subdivisions and new commercial pay actual cost instead.',
+  covers:'Required frontage improvements (PMC 11.08.135).',
+  params:[{k:'noCurb',l:'No existing curb',v:243.15,u:'$/ft'},{k:'curb',l:'Existing curb',v:121.57,u:'$/ft'},{k:'capPct',l:'Cap, share of project valuation',v:15,u:'%'}],
+  src:[{t:'Puyallup Development Engineering Fee Schedule (01/16/26)',u:'https://puyallupwa.gov/DocumentCenter/View/15231/CoP-Development-Engineering-Fee-Schedule-011626'}],
+  fn:function(s,P){ var F=reqF(s), N=sumLen(F.filter(function(f){return !f.curb;})), K=sumLen(F.filter(function(f){return f.curb;})), v=N*P.noCurb+K*P.curb;
+    var lines=[ft(N)+' without curb x $'+P.noCurb+' = '+usd(N*P.noCurb), ft(K)+' with curb x $'+P.curb+' = '+usd(K*P.curb)];
+    if(s.constrValue>0){ var cap=s.constrValue*P.capPct/100; if(v>cap){ lines.push('Capped at '+P.capPct+'% of '+usd(s.constrValue)+' = '+usd(cap)); v=cap; } else lines.push('Under the cap of '+usd(cap)); }
+    else lines.push('No project valuation entered, so the 15% cap is not applied.');
+    return {fee:v,lo:v,hi:v,lines:lines}; }},
 
  {id:'pdx', name:'Portland, OR (LTIC)', group:'us', conf:'published', asof:'$796/ft from July 1, 2026',
   how:'Per foot of frontage on local streets without a curb, in single-dwelling zones. Arterials and curbed streets are not charged. ADUs and affordable housing are exempt, with other exemptions. $750/ft applied through June 30, 2026.',
@@ -432,18 +444,18 @@ var CITIES = [
   src:[{t:'Tampa Sidewalk In-Lieu Fee application',u:'https://www.tampa.gov/sites/default/files/document/2026/sidewalk-in-lieu-form-updated-07-13-2026-rev10.26.26_ada.pdf'}],
   fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x $'+P.rate+'/ft = '+usd(v)]}; }},
 
- {id:'hou', name:'Houston, TX', group:'us', conf:'published', asof:'Rate reflects 2022 costs, confirmed annually',
+ {id:'hou', name:'Houston, TX', group:'us', conf:'published', asof:'$12/sq ft in City fee schedule effective Jan 1, 2026',
   how:'Per square foot of the sidewalk that would have been required. The City Engineer sets the rate from the material and labor cost of City-built sidewalks. Automatic eligibility is narrow (new single-family on a local street, not a corner lot, no sidewalk within 500 ft, and others).',
   covers:'Sidewalk only. Houston does not state a sidewalk width; the width here is your input.',
   params:[{k:'rate',l:'Charge',v:12,u:'$/sq ft'}],
-  src:[{t:'Houston Fee in Lieu of Sidewalk Construction',u:'https://houstontx.gov/planning/sidewalk-fee-in-lieu.html'}],
+  src:[{t:'Houston Fee in Lieu of Sidewalk Construction',u:'https://houstontx.gov/planning/sidewalk-fee-in-lieu.html'},{t:'Houston City-Wide Fee Schedule (search "sidewalk")',u:'https://cohweb.houstontx.gov/FIN_FeeSchedule/default.aspx'}],
   fn:function(s,P){ var L=sumLen(needWalk(s)), a=L*s.width, v=a*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x '+s.width+' ft wide = '+Math.round(a).toLocaleString()+' sq ft x $'+P.rate+' = '+usd(v)]}; }},
 
- {id:'atx', name:'Austin, TX', group:'us', conf:'published', asof:'Current (page undated)',
+ {id:'atx', name:'Austin, TX', group:'us', conf:'published', asof:'Confirmed in City ROW residential review guidelines, Nov 10, 2025',
   how:'Per square foot of sidewalk, by use: residential, multifamily, commercial.',
   covers:'Sidewalk, spent under the Sidewalk Plan.',
   params:[{k:'res',l:'Residential',v:7.5,u:'$/sq ft'},{k:'mf',l:'Multifamily',v:18,u:'$/sq ft'},{k:'com',l:'Commercial',v:24,u:'$/sq ft'}],
-  src:[{t:'Austin sidewalk fee in lieu',u:'https://austintexas.gov/node/89130'}],
+  src:[{t:'Austin sidewalk fee in lieu',u:'https://austintexas.gov/node/89130'},{t:'Austin ROW Residential Review Guidelines (Nov 10, 2025)',u:'https://www.austintexas.gov/sites/default/files/files/TPW/LDE/Right_of_Way_Residential_Review_Guidelines_FINAL_2025-11-10.pdf'}],
   fn:function(s,P){ var r=P[s.use]||P.res, L=sumLen(needWalk(s)), a=L*s.width, v=a*r; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x '+s.width+' ft = '+Math.round(a).toLocaleString()+' sq ft x $'+r+' ('+({res:'residential',mf:'multifamily',com:'commercial'})[s.use]+') = '+usd(v)]}; }},
 
  {id:'brook', name:'Brookhaven, GA', group:'us', conf:'published', asof:'Council increase adopted Jan 27, 2026; reviewed annually',
@@ -453,11 +465,11 @@ var CITIES = [
   src:[{t:'Rough Draft Atlanta, Mar 2026 (quotes the City release: $50 to $77, adopted Jan 27)',u:'https://roughdraftatlanta.com/2026/03/29/brookhaven-sidewalk-project-executive-park/'},{t:'City of Brookhaven news flash (the $77 rate and 7.5 ft assumption)',u:'https://www.brookhavenga.gov/m/newsflash/home/detail/78'}],
   fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x $'+P.rate+'/ft = '+usd(v)]}; }},
 
- {id:'nash', name:'Nashville, TN', group:'caution', conf:'invalidated', asof:'Sixth Circuit, May 10, 2023',
-  how:'Per foot, set each July 1 from, but reduced below, Metro\'s three-year average sidewalk cost ($186/ft in 2020-21; Metro\'s actual cost averaged $837/ft in Jan 2020), capped at 3% of construction value. In Knight v. Metro (6th Cir. May 10, 2023) the court held that Nollan/Dolan applies to legislated sidewalk conditions, reversed the district court, and remanded; Metro had not defended the ordinance under that test. Shown as a caution, not a rate to copy.',
+ {id:'nash', name:'Nashville, TN', group:'caution', conf:'invalidated', asof:'Not collected since the May 2023 ruling',
+  how:'Per foot, set each July 1 from, but reduced below, Metro\'s three-year average sidewalk cost ($186/ft in 2020-21; Metro\'s actual cost averaged $837/ft in Jan 2020), capped at 3% of construction value. In Knight v. Metro (6th Cir. May 10, 2023) the court held that Nollan/Dolan applies to legislated sidewalk conditions, reversed the district court, and remanded; Metro had not defended the ordinance under that test. Metro then stopped collecting in-lieu fees. Shown as a caution, not a rate to copy.',
   covers:'Pedestrian benefit fund.',
   params:[{k:'rate',l:'Charge (2020-21)',v:186,u:'$/ft'},{k:'capPct',l:'Cap, share of construction value',v:3,u:'%'}],
-  src:[{t:'Knight v. Metro, Sixth Circuit opinion (May 10, 2023)',u:'https://slfliberty.org/wp-content/uploads/2022/09/20230510-Opinion-and-Order-Doc.-60.pdf'},{t:'Knight v. Metro, district court opinion (source of $186 and 3%; reversed on appeal)',u:'https://www.govinfo.gov/content/pkg/USCOURTS-tnmd-3_20-cv-00922/pdf/USCOURTS-tnmd-3_20-cv-00922-0.pdf'},{t:'Infinium Builders v. Metro (M.D. Tenn. Aug 2025), third-party case summary',u:'https://app.midpage.ai/case/infinium-builders-llc-v-metropolitan-11117294'}],
+  src:[{t:'Knight v. Metro, Sixth Circuit opinion (May 10, 2023)',u:'https://slfliberty.org/wp-content/uploads/2022/09/20230510-Opinion-and-Order-Doc.-60.pdf'},{t:'Knight v. Metro, district court opinion (source of $186 and 3%; reversed on appeal)',u:'https://www.govinfo.gov/content/pkg/USCOURTS-tnmd-3_20-cv-00922/pdf/USCOURTS-tnmd-3_20-cv-00922-0.pdf'},{t:'Nashville Banner, July 2023 (Metro stopped collecting the fee)',u:'https://nashvillebanner.com/2023/07/10/at-issue-sidewalks/'},{t:'Infinium Builders v. Metro (M.D. Tenn. Aug 2025), third-party case summary',u:'https://app.midpage.ai/case/infinium-builders-llc-v-metropolitan-11117294'}],
   fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate, lines=[ft(L)+' x $'+P.rate+'/ft = '+usd(v)];
     if(s.constrValue>0){ var cap=s.constrValue*P.capPct/100; if(v>cap){ lines.push('Capped at '+P.capPct+'% of '+usd(s.constrValue)+' = '+usd(cap)); v=cap; } else lines.push('Under the cap of '+usd(cap)); }
     else lines.push('No construction value entered, so the 3% cap is not applied.');
@@ -659,7 +671,7 @@ var ELIG = [
       var fee=isB?'Builds':x.lo==null?'n/a':rK(x.lo,x.hi), rev=isB?'$0':x.lo==null?'n/a':rK(x.lo*n,x.hi*n);
       var RL=sumLen(reqF(state)), pf=(isB||x.lo==null||!RL)?'–':rK(x.lo/RL,x.hi/RL), sh=isB?null:shareOf(x,C), pc=!sh?'–':(sh[0]===sh[1]?sh[0]+'%':sh[0]+'–'+sh[1]+'%');
       return '<button type="button" class="trow'+(sel?' sel':'')+(c.group==='caution'?' caution':'')+'" data-city="'+c.id+'" aria-pressed="'+sel+'">'+
-        '<span class="tn"><b>'+esc(nm(c))+'</b>'+src(c.conf)+((!isB&&x.hi===0)?'<i>'+(c.id==='shelton'?'rate is set at $0':c.id==='pdx'?'charges only local streets without curb':'no sidewalk owed')+'</i>':'')+'</span><span class="tf">'+fee+'</span><span class="tp">'+pf+'</span><span class="tc">'+pc+'</span><span class="tt">'+band+mark+'</span></button>';
+        '<span class="tn"><b>'+esc(nm(c))+'</b>'+src(c.conf)+((!isB&&x.hi===0)?'<i>'+(c.id==='pdx'?'charges only local streets without curb':'no sidewalk owed')+'</i>':'')+'</span><span class="tf">'+fee+'</span><span class="tp">'+pf+'</span><span class="tc">'+pc+'</span><span class="tt">'+band+mark+'</span></button>';
     }).join('');
     $('tbl').querySelectorAll('[data-city]').forEach(function(b){ b.addEventListener('click',function(){ setCity(b.getAttribute('data-city')); }); });
   }
@@ -695,7 +707,7 @@ var ELIG = [
     $('mMath').textContent=r.lines.join('\n');
     $('costLines').textContent=C.items.length? C.items.map(function(it){ return it.label+': '+(it.unit.indexOf('ft')>-1&&it.unit.indexOf('sq')<0?ft(it.qty):it.qty)+(it.priced?' x '+usdR(s.rates[it.k].lo,s.rates[it.k].hi)+' = '+usdR(it.lo,it.hi):'  (not priced)'); }).join('\n')+'\nDeveloper\'s cost, priced items: '+usdR(C.lo,C.hi)+'\nCity\'s cost to build later: '+(CC?usdR(CC.lo,CC.hi)+' (developer\'s cost + '+m+'%)':'not set') : 'No required work.';
     var ed=/ \(edited\)$/.test(s.caseName), B=[];
-    var cf={published:['','published by the city'],cost:['w','set from cost to build, so only as good as the unit costs'],unclear:['w','listing is ambiguous; confirm with Olympia'],invalidated:['b','struck down in court, 2023'],baseline:['','current practice']}[c.conf]||['w',''];
+    var cf={published:['','published by the city'],cost:['w','set from cost to build, so only as good as the unit costs'],unclear:['w','listing is ambiguous; confirm with Olympia'],invalidated:['b','legal challenge succeeded on appeal (2023); Metro stopped collecting'],baseline:['','current practice']}[c.conf]||['w',''];
     B.push([s.cityOv[c.id]?'w':cf[0],'Fee rules',s.cityOv[c.id]?'edited by you':cf[1]]);
     B.push(s.origin==='docs'?[ed?'w':'','Street lengths',ed?'City documents, then edited':'City documents and parcel map']:s.origin==='maps'?[ed?'w':'','Street lengths',ed?'City parcel map, then edited':'City parcel map']:['n','Street lengths','entered by you']);
     B.push(s.origin==='docs'?[ed?'w':'','Curb, sidewalk, ramps',ed?'pre-application letter, then edited':'pre-application letter']:s.origin==='maps'?['w','Curb, sidewalk, ramps','sidewalk from City map; curb and ramps are guesses']:['n','Curb, sidewalk, ramps','entered by you']);
