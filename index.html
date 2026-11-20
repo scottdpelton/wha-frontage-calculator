@@ -304,7 +304,7 @@ function tag(k){ var c=CONF[k]||CONF.placeholder; return '<span class="tag t-'+c
 /* ---------- unit rates for "cost to build" (Bellingham has none published) ---------- */
 var RATE_DEFAULTS = {
   sidewalk:{label:'Sidewalk (5 ft concrete)',unit:'per ft of frontage',lo:60,hi:243,conf:'comparable',
-    src:'Comparable cities, not Bellingham. Low: Houston sets its $12/sq ft fee from City sidewalk costs ($60/ft at 5 ft). High: Nashville NDOT reported $243/ft average.'},
+    src:'Comparable cities, not Bellingham. Low: Houston sets its $12/sq ft fee from City sidewalk costs ($60/ft only if a 5 ft sidewalk is assumed; Houston does not state a width). High: Nashville NDOT reported cost falling from $365 to $243 per ft (Nashville Mayor\'s commitments tracker); Metro\'s court record shows $837/ft actual in Jan 2020, so $243 is a low-cost Nashville figure.'},
   curbGutter:{label:'Curb and gutter',unit:'per ft of frontage',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
   paving:{label:'Street paving to three-quarter standard',unit:'per ft of frontage',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
   ramp:{label:'Curb ramp',unit:'each',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
@@ -391,29 +391,29 @@ var CITIES = [
     return {fee:C.lo*m,lo:C.lo*m,hi:C.hi*m,lines:['Cost to build (priced items) '+usdR(C.lo,C.hi),'x (1 + '+P.enr+'%)^'+P.yrs+' = x '+m.toFixed(3),'= '+usdR(C.lo*m,C.hi*m)+(C.partial?' (unpriced items missing)':'')]};
   }},
 
- {id:'wacost', name:'Everett, Renton, Ferndale, Auburn (WA)', group:'wa', conf:'cost', asof:'Current codes',
-  how:'Fee equals the estimated cost to build, from the applicant\'s engineer or a City estimate. Renton binds the approval for 5 years.',
+ {id:'wacost', name:'Everett and Auburn (WA)', group:'wa', conf:'cost', asof:'Current codes',
+  how:'Everett: fee equals the cost to design and install, from the applicant\'s licensed engineer (City Engineer approves) or a standard fee the City Engineer sets. Auburn: fee based on the City\'s estimated cost to complete the improvements. Renton sets its amount by fee schedule and is not modeled.',
   covers:'The required frontage scope.',
   params:[],
-  src:[{t:'Everett EMC 19.26.060',u:'https://everett.municipal.codes/EMC/19.26.060'},{t:'Renton RMC 4-9-060',u:'https://www.codepublishing.com/WA/Renton/html/Renton04/Renton0409/Renton0409060.html'}],
+  src:[{t:'Everett EMC 19.26.060',u:'https://everett.municipal.codes/EMC/19.26.060'},{t:'Auburn ACC 12.64A.050',u:'https://auburn.municipal.codes/ACC/12.64A.050'},{t:'Renton RMC 4-9-060 (amount set by City fee schedule; not modeled)',u:'https://www.codepublishing.com/WA/Renton/html/Renton04/Renton0409/Renton0409060.html'}],
   fn:function(s,P,C){ return {fee:C.lo,lo:C.lo,hi:C.hi,lines:['Fee = cost to build (priced items) = '+usdR(C.lo,C.hi)+(C.partial?' (unpriced items missing)':'')]}; }},
 
- {id:'olympia', name:'Olympia, WA', group:'wa', conf:'unclear', asof:'Current fee chapter',
-  how:'Listed as "Sidewalk Fee-in-lieu (Per City Engineer Estimate)" at a per-foot amount, under the permit and inspection fee table. Confirm with Olympia before relying on it.',
+ {id:'olympia', name:'Olympia, WA', group:'wa', conf:'unclear', asof:'Fee table effective Jan 1, 2024',
+  how:'Listed as "Sidewalk Fee-in-lieu (Per City Engineer Estimate)" at $77.39 per linear foot or part thereof, in the permit and inspection fee table (OMC 4.04.010). The code does not say when it applies. Confirm with Olympia before relying on it.',
   covers:'Sidewalk.',
   params:[{k:'rate',l:'Listed amount',v:77.39,u:'$/ft'}],
   src:[{t:'Olympia Municipal Code 4.04',u:'https://codepublishing.com/WA/Olympia/html/Olympia04/Olympia0404.html'}],
   fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x $'+P.rate+'/ft = '+usd(v)]}; }},
 
  {id:'shelton', name:'Shelton, WA', group:'wa', conf:'published', asof:'Base set 2016, indexed',
-  how:'Frontage improvement charge in the neighborhood residential zone. Base fee set at $0 per foot in 2016 and indexed to the Seattle construction cost index, so it stays $0. In effect, a waiver.',
-  covers:'Pedestrian projects on the six-year TIP, if any revenue.',
+  how:'Frontage improvement charge in the neighborhood residential zone. Base fee set at $0 per foot for 2016, then adjusted each year by the October-to-October change in the construction cost index. A $0 base indexed this way stays $0 unless the code is amended.',
+  covers:'Frontage improvements in the neighborhood residential zone, per the city public works design standards.',
   params:[{k:'rate',l:'Charge',v:0,u:'$/ft'}],
   src:[{t:'Shelton Municipal Code 12.36',u:'https://www.codepublishing.com/WA/Shelton/html/Shelton12/Shelton1236.html'}],
   fn:function(s,P){ var L=sumLen(reqF(s)), v=L*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' of required frontage x $'+P.rate+'/ft = '+usd(v)]}; }},
 
  {id:'pdx', name:'Portland, OR (LTIC)', group:'us', conf:'published', asof:'$796/ft from July 1, 2026',
-  how:'Per foot of frontage on local streets without a curb, in single-dwelling zones. Arterials and curbed streets are not charged. ADUs are exempt.',
+  how:'Per foot of frontage on local streets without a curb, in single-dwelling zones. Arterials and curbed streets are not charged. ADUs and affordable housing are exempt, with other exemptions. $750/ft applied through June 30, 2026.',
   covers:'Pooled for local street projects.',
   params:[{k:'rate',l:'Charge',v:796,u:'$/ft'},{k:'cap',l:'Cap on charged frontage (0 = none)',v:0,u:'ft'}],
   src:[{t:'Portland LTIC',u:'https://www.portland.gov/transportation/permitting/ltic'},{t:'Portland TRN-3.450 fee schedule',u:'https://www.portland.gov/transportation/documents/trn-3450-exhibit-c-fees-rates-and-charges-transportation-development-0/download'}],
@@ -425,16 +425,16 @@ var CITIES = [
     return {fee:v,lo:v,hi:v,lines:lines};
   }},
 
- {id:'tampa', name:'Tampa, FL', group:'us', conf:'published', asof:'Form revised Oct 2026',
+ {id:'tampa', name:'Tampa, FL', group:'us', conf:'published', asof:'Instructions dated July 2026',
   how:'Per foot of frontage where sidewalk is required but "not practical" (grand tree, drainage ditch, unique circumstances, or an unsidewalked residential neighborhood).',
   covers:'Sidewalk trust fund.',
   params:[{k:'rate',l:'Charge',v:220,u:'$/ft'}],
   src:[{t:'Tampa Sidewalk In-Lieu Fee application',u:'https://www.tampa.gov/sites/default/files/document/2026/sidewalk-in-lieu-form-updated-07-13-2026-rev10.26.26_ada.pdf'}],
   fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x $'+P.rate+'/ft = '+usd(v)]}; }},
 
- {id:'hou', name:'Houston, TX', group:'us', conf:'published', asof:'Current',
-  how:'Per square foot of the sidewalk that would have been required. The City Engineer sets the rate from City sidewalk project costs.',
-  covers:'Sidewalk only.',
+ {id:'hou', name:'Houston, TX', group:'us', conf:'published', asof:'Rate reflects 2022 costs, confirmed annually',
+  how:'Per square foot of the sidewalk that would have been required. The City Engineer sets the rate from the material and labor cost of City-built sidewalks. Automatic eligibility is narrow (new single-family on a local street, not a corner lot, no sidewalk within 500 ft, and others).',
+  covers:'Sidewalk only. Houston does not state a sidewalk width; the width here is your input.',
   params:[{k:'rate',l:'Charge',v:12,u:'$/sq ft'}],
   src:[{t:'Houston Fee in Lieu of Sidewalk Construction',u:'https://houstontx.gov/planning/sidewalk-fee-in-lieu.html'}],
   fn:function(s,P){ var L=sumLen(needWalk(s)), a=L*s.width, v=a*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x '+s.width+' ft wide = '+Math.round(a).toLocaleString()+' sq ft x $'+P.rate+' = '+usd(v)]}; }},
@@ -446,18 +446,18 @@ var CITIES = [
   src:[{t:'Austin sidewalk fee in lieu',u:'https://austintexas.gov/node/89130'}],
   fn:function(s,P){ var r=P[s.use]||P.res, L=sumLen(needWalk(s)), a=L*s.width, v=a*r; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x '+s.width+' ft = '+Math.round(a).toLocaleString()+' sq ft x $'+r+' ('+({res:'residential',mf:'multifamily',com:'commercial'})[s.use]+') = '+usd(v)]}; }},
 
- {id:'brook', name:'Brookhaven, GA', group:'us', conf:'published', asof:'Page updated 2019',
-  how:'Flat payment into the sidewalk fund per foot of frontage.',
+ {id:'brook', name:'Brookhaven, GA', group:'us', conf:'published', asof:'City page last updated 9/16/19',
+  how:'Flat $50 per linear foot paid into the sidewalk fund where sidewalks are required (2018 ordinance, per local press).',
   covers:'Sidewalk fund.',
   params:[{k:'rate',l:'Charge',v:50,u:'$/ft'}],
-  src:[{t:'Brookhaven sidewalk requirements',u:'https://www.brookhavenga.gov/sites/default/files/fileattachments/community_development/page/18742/sidewalks.pdf'}],
+  src:[{t:'Brookhaven sidewalk requirements (City PDF)',u:'https://www.brookhavenga.gov/sites/default/files/fileattachments/community_development/page/18742/sidewalks.pdf'},{t:'Reporter Newspapers, May 2018 (second source for $50/ft)',u:'https://www.reporternewspapers.net/2018/05/14/brookhaven-city-council-promises-sidewalks-to-everywhere/'}],
   fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x $'+P.rate+'/ft = '+usd(v)]}; }},
 
- {id:'nash', name:'Nashville, TN', group:'caution', conf:'invalidated', asof:'Enforcement stopped May 2023',
-  how:'Per foot, set yearly below the City\'s average sidewalk cost ($186/ft in 2020-21), capped at 3% of construction value. The Sixth Circuit held it failed the Nollan/Dolan test in Knight v. Metro (2023). Shown as a caution.',
+ {id:'nash', name:'Nashville, TN', group:'caution', conf:'invalidated', asof:'Sixth Circuit, May 10, 2023',
+  how:'Per foot, set each July 1 from, but reduced below, Metro\'s three-year average sidewalk cost ($186/ft in 2020-21; Metro\'s actual cost averaged $837/ft in Jan 2020), capped at 3% of construction value. In Knight v. Metro (6th Cir. May 10, 2023) the court held that Nollan/Dolan applies to legislated sidewalk conditions, reversed the district court, and remanded; Metro had not defended the ordinance under that test. Shown as a caution, not a rate to copy.',
   covers:'Pedestrian benefit fund.',
   params:[{k:'rate',l:'Charge (2020-21)',v:186,u:'$/ft'},{k:'capPct',l:'Cap, share of construction value',v:3,u:'%'}],
-  src:[{t:'Knight v. Metro Nashville (district court record)',u:'https://www.govinfo.gov/content/pkg/USCOURTS-tnmd-3_20-cv-00922/pdf/USCOURTS-tnmd-3_20-cv-00922-0.pdf'},{t:'Infinium Builders v. Metro Nashville (2025)',u:'https://app.midpage.ai/case/infinium-builders-llc-v-metropolitan-11117294'}],
+  src:[{t:'Knight v. Metro, Sixth Circuit opinion (May 10, 2023)',u:'https://slfliberty.org/wp-content/uploads/2022/09/20230510-Opinion-and-Order-Doc.-60.pdf'},{t:'Knight v. Metro, district court opinion (source of $186 and 3%; reversed on appeal)',u:'https://www.govinfo.gov/content/pkg/USCOURTS-tnmd-3_20-cv-00922/pdf/USCOURTS-tnmd-3_20-cv-00922-0.pdf'},{t:'Infinium Builders v. Metro (M.D. Tenn. Aug 2025), third-party case summary',u:'https://app.midpage.ai/case/infinium-builders-llc-v-metropolitan-11117294'}],
   fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate, lines=[ft(L)+' x $'+P.rate+'/ft = '+usd(v)];
     if(s.constrValue>0){ var cap=s.constrValue*P.capPct/100; if(v>cap){ lines.push('Capped at '+P.capPct+'% of '+usd(s.constrValue)+' = '+usd(cap)); v=cap; } else lines.push('Under the cap of '+usd(cap)); }
     else lines.push('No construction value entered, so the 3% cap is not applied.');
@@ -514,7 +514,7 @@ var ELIG = [
     hdip4b:['3605 Mill Ave, 36th St only','HDIP-0004 if Samish Way is dropped','The same lot with Samish Way not required, as discussed at the November 17 Task Force (staff to confirm).'],
     custom:['Your own lot','Enter any streets and lengths','Describe the lot under "Edit the lot" below.']
   };
-  var SHORT={cob:'Bellingham today',wacost:'Everett, Renton, Ferndale, Auburn',pdx:'Portland, OR'};
+  var SHORT={cob:'Bellingham today',wacost:'Everett, Auburn',pdx:'Portland, OR'};
   function nm(c){ return SHORT[c.id]||c.name; }
   function src(k){ var c=CONF[k]||CONF.placeholder; return '<span class="src s-'+c.c+'">'+c.t+'</span>'; }
   function freshRates(){ return JSON.parse(JSON.stringify(RATE_DEFAULTS)); }
@@ -614,7 +614,7 @@ var ELIG = [
     $('mParams').querySelectorAll('[data-p]').forEach(function(el){ el.addEventListener('input',function(){ var o=state.cityOv[c.id]=state.cityOv[c.id]||{}; var v=parseFloat(el.value); o[el.getAttribute('data-p')]=isNaN(v)?0:v; render(); }); el.addEventListener('change',renderMethod); });
     $('mReset').hidden=!state.cityOv[c.id];
     $('paOpts').hidden=c.id!=='pa'; var anyX=false; $('mExtra').querySelectorAll('[data-for]').forEach(function(l){ var on=l.getAttribute('data-for').split(' ').indexOf(c.id)>-1; l.hidden=!on; anyX=anyX||on; }); $('mExtra').hidden=!anyX;
-    $('mSrc').innerHTML=!c.src.length?'Current Bellingham practice.':c.src.map(function(x){ return '<a href="'+x.u+'" target="_blank" rel="noopener">'+esc(x.t)+'</a>'; }).join('<br>');
+    $('mSrc').innerHTML=!c.src.length?'Current Bellingham practice.':c.src.map(function(x){ return '<a href="'+x.u+'" target="_blank" rel="noopener noreferrer">'+esc(x.t)+'</a>'; }).join('<br>');
   }
 
   /* unit rates */
