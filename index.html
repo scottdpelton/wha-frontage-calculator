@@ -223,6 +223,15 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
 .mapwrap{position:relative}.mapmove{position:absolute;left:8px;bottom:26px;z-index:500;font-size:13px;padding:4px 10px}
 .mapmsg{font-size:13px;margin:6px 0 0}.mapkey{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--muted);margin-top:4px}.mapkey i{display:inline-block;width:14px;height:4px;border-radius:2px;margin-right:5px;vertical-align:middle}.mapkey i.dash{background:repeating-linear-gradient(90deg,#999 0 4px,transparent 4px 7px)}
 .leaflet-control-attribution{font-size:10px!important;max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+@media(max-width:760px){
+.citybar{display:block;padding:8px 0 8px 12px;border-bottom:2px solid var(--acc)}
+.citybar .cl{display:block;font-size:13px;font-weight:600;color:inherit;margin-bottom:6px}
+.citybar .cl::after{content:' · swipe for more →';font-weight:400;color:var(--muted)}
+#cityBtns{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent);padding-right:24px}
+.cbtn{font-size:15px;padding:8px 13px;border-radius:999px}
+.cbtn.on{box-shadow:0 0 0 2px var(--acc)}
+}
 </style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -232,7 +241,8 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
   <h1>Frontage fee-in-lieu calculator</h1>
   <div><span class="muted" id="copyMsg" role="status" style="font-size:13px"></span><button type="button" class="btn" id="copySum">Copy result</button><button type="button" class="btn" id="resetAll">Reset</button></div>
 </div>
-<div class="citybar"><span class="cl">Apply the rules of</span><div id="cityBtns"></div></div>
+<div class="citybar"><span class="cl">Pick a city to compare</span><div id="cityBtns"></div>
+</div>
 <div class="app">
   <div class="rail">
     <section class="panel">
@@ -707,7 +717,10 @@ var MAP=(function(){
   function renderCities(){
     $('cityBtns').innerHTML=GROUPS.map(function(g){ return '<div class="grp"><span class="gl">'+g[1]+'</span>'+CITIES.filter(function(c){return c.group===g[0];}).map(function(c){ return '<button type="button" class="cbtn'+(c.id===state.cityId?' on':'')+(c.group==='caution'?' caution':'')+'" data-city="'+c.id+'" aria-pressed="'+(c.id===state.cityId)+'">'+esc(nm(c))+'</button>'; }).join('')+'</div>'; }).join('');
     $('cityBtns').querySelectorAll('[data-city]').forEach(function(b){ b.addEventListener('click',function(){ setCity(b.getAttribute('data-city')); }); });
+    var on=$('cityBtns').querySelector('.cbtn.on'); if(on&&on.scrollIntoView&&window.innerWidth<=760){ var bx=$('cityBtns'), l=on.offsetLeft-bx.offsetLeft; if(l<bx.scrollLeft||l+on.offsetWidth>bx.scrollLeft+bx.clientWidth-30) bx.scrollLeft=Math.max(0,l-bx.clientWidth/2+on.offsetWidth/2); }
   }
+  function ordCities(){ var o=[]; GROUPS.forEach(function(g){ CITIES.forEach(function(c){ if(c.group===g[0]) o.push(c); }); }); return o; }
+  function stepCity(d){ var O=ordCities(), i=O.findIndex(function(c){return c.id===state.cityId;}); setCity(O[(i+d+O.length)%O.length].id); }
   function setCity(id){ state.cityId=id; renderCities(); renderMethod(); render(); }
 
 
@@ -861,6 +874,7 @@ var MAP=(function(){
   }
 
   function render(full){
+    renderCities();
     var s=state, c=CITY[s.cityId], C=costToBuild(s), r=runCity(s,c,C), n=s.casesPerYear||0, isB=c.id==='cob';
     var m=s.cityMarkup, mLo=m!=null?m:CITY_CM.lo, mHi=m!=null?m:CITY_CM.hi, CC=C.lo!=null?{lo:C.lo*(1+mLo/100),hi:C.hi*(1+mHi/100)}:null;
     var feeTxt=r.fee==null?'n/a':usdR(r.lo,r.hi), revTxt=isB?'$0':r.fee==null?'n/a':usdR(r.lo*n,r.hi*n);
