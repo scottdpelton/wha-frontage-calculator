@@ -668,13 +668,20 @@ var ELIG = [
   var LOTS=null, loading=null;
   function tc(a){ return a.toLowerCase().replace(/\b[a-z]/g,function(c){return c.toUpperCase();}).replace(/\b(St|Ave|Rd|Dr|Ln|Ct|Pl|Way|Blvd|Pkwy)\b/g,'$1'); }
   function getLots(){ if(LOTS) return Promise.resolve(LOTS); if(!loading){ $('addrMsg').textContent='Loading the address list…'; loading=fetch('lots.json').then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){ LOTS=j; $('addrMsg').textContent=''; return j; }).catch(function(){ loading=null; $('addrMsg').textContent='The address list did not load. Enter the lot by hand under "Edit the lot".'; throw 0; }); } return loading; }
+  var SUF={STREET:'ST',AVENUE:'AVE',AV:'AVE',ROAD:'RD',DRIVE:'DR',LANE:'LN',COURT:'CT',PLACE:'PL',BOULEVARD:'BLVD',PARKWAY:'PKWY',CIRCLE:'CIR',TERRACE:'TER',HIGHWAY:'HWY',LOOP:'LP'};
+  function normAddr(v){
+    var s=v.toUpperCase().replace(/[.,#]/g,' ').replace(/\s+/g,' ').trim();
+    s=s.replace(/\s+(BELLINGHAM)(\s+(WA|WASHINGTON))?(\s+\d{5}(-\d{4})?)?$/,'').replace(/\s+(WA|WASHINGTON)(\s+\d{5})?$/,'').replace(/\s+\d{5}$/,'').trim();
+    return s.split(' ').map(function(w,i){ return i>0&&SUF[w]?SUF[w]:w; }).join(' ');
+  }
   function search(){
-    var qy=$('addr').value.trim().toUpperCase().replace(/\s+/g,' ');
+    var qy=normAddr($('addr').value);
     if(qy.length<3){ $('addrList').innerHTML=''; $('addrMsg').textContent=''; return; }
     getLots().then(function(j){
-      if($('addr').value.trim().toUpperCase().replace(/\s+/g,' ')!==qy) return;
+      if(normAddr($('addr').value)!==qy) return;
       var hits=[], L=j.lots; for(var i=0;i<L.length&&hits.length<8;i++){ if(L[i][0].indexOf(qy)===0) hits.push(i); }
       if(hits.length<8) for(i=0;i<L.length&&hits.length<8;i++){ if(L[i][0].indexOf(qy)>0) hits.push(i); }
+      if(!hits.length){ var tk=qy.split(' '); if(tk.length>1) for(i=0;i<L.length&&hits.length<8;i++){ var a=L[i][0]; if(a.indexOf(tk[0]+' ')===0&&a.indexOf(tk[1])>0) hits.push(i); } }
       $('addrList').innerHTML=hits.map(function(h){ return '<button type="button" data-h="'+h+'">'+esc(tc(L[h][0]))+'</button>'; }).join('');
       $('addrMsg').textContent=hits.length?'':'No match. Some lots (condos, new plats, lots with no street edge on the map) are not in the list.';
       $('addrList').querySelectorAll('[data-h]').forEach(function(b){ b.addEventListener('click',function(){ pickLot(j,+b.getAttribute('data-h')); }); });
