@@ -219,6 +219,10 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
 #ft input,#ft select{font-size:16px}
 }
 .br>span:first-child,.bgh>b,.rh>b,.bt>span{min-width:0;flex:1 1 auto}.br>span:last-child,.bgh>span,.rt{flex:0 0 auto;text-align:right}
+#map{height:320px;border-radius:8px;margin-top:8px;border:1px solid var(--line)}@media(max-width:620px){#map{height:280px}}
+.mapwrap{position:relative}.mapmove{position:absolute;left:8px;bottom:26px;z-index:500;font-size:13px;padding:4px 10px}
+.mapmsg{font-size:13px;margin:6px 0 0}.mapkey{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--muted);margin-top:4px}.mapkey i{display:inline-block;width:14px;height:4px;border-radius:2px;margin-right:5px;vertical-align:middle}.mapkey i.dash{background:repeating-linear-gradient(90deg,#999 0 4px,transparent 4px 7px)}
+.leaflet-control-attribution{font-size:10px!important;max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -236,6 +240,10 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
         <label for="addr">Look up any Bellingham address</label>
         <input id="addr" type="text" placeholder="Type an address, e.g. 3605 Mill Ave" autocomplete="off" spellcheck="false">
         <div id="addrList"></div><p class="muted" id="addrMsg" role="status"></p>
+        <button type="button" class="link" id="mapOpen">Or pick a lot on the map</button>
+        <div class="mapwrap"><div id="map" hidden></div><button type="button" class="btn mapmove" id="mapMove" hidden>Move map</button></div>
+        <p class="muted mapmsg" id="mapMsg" role="status"></p>
+        <div id="mapKey" class="mapkey" hidden><span><i style="background:#ff7a1a"></i>Parcel</span><span><i style="background:#22c55e"></i>Sidewalk</span><span><i style="background:#ffcc00"></i>Incomplete</span><span><i class="dash"></i>Street center</span></div>
       </div>
       <h2 style="margin-top:14px">or use a documented case</h2>
       <div class="lots" id="lotBtns"></div>
@@ -625,10 +633,47 @@ var ELIG = [
   {k:'critical',t:'Safe route to school or ADA-critical segment (excluded)',pos:false}
 ];
 
+/* map overlay: live City GIS (maps.cob.org) on an aerial basemap */
+var MAP=(function(){
+  var B='https://maps.cob.org/arcgis4/rest/services/Maps/', m=null, grp=null, ready=null;
+  function css(h){ var l=document.createElement('link'); l.rel='stylesheet'; l.href=h; document.head.appendChild(l); }
+  function js(s){ return new Promise(function(ok,no){ var e=document.createElement('script'); e.src=s; e.onload=ok; e.onerror=no; document.head.appendChild(e); }); }
+  function load(){ if(!ready){ css('leaflet/leaflet.css'); ready=js('leaflet/leaflet.js'); } return ready; }
+  function q(path,p){ var u=B+path+'/query?'+Object.keys(p).map(function(k){return k+'='+encodeURIComponent(p[k]);}).join('&')+'&outSR=4326&f=geojson'; return fetch(u).then(function(r){ if(!r.ok) throw 0; return r.json(); }); }
+  function init(onPick){
+    var el=document.getElementById('map'); el.hidden=false; document.getElementById('mapKey').hidden=false;
+    if(m) return;
+    var touch=('ontouchstart' in window);
+    m=L.map(el,{scrollWheelZoom:false,dragging:!touch,tap:false,zoomSnap:0.5}).setView([48.7519,-122.4787],13);
+    var cob=L.tileLayer('https://maps.cob.org/arcgis4/rest/services/Imagery/Photo_2022/MapServer/tile/{z}/{y}/{x}',{maxZoom:21,maxNativeZoom:20,attribution:'Aerial 2022: City of Bellingham, Whatcom Co., EagleView · City GIS'});
+    var air=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:21,maxNativeZoom:19,attribution:'Aerial: Esri, Maxar · City of Bellingham GIS'});
+    var st=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20,maxNativeZoom:19,attribution:'© OpenStreetMap · City of Bellingham GIS'});
+    cob.addTo(m); L.control.layers({'City aerial 2022':cob,'Esri aerial':air,'Street map':st},null,{position:'topright'}).addTo(m);
+    grp=L.layerGroup().addTo(m);
+    if(touch){ var b=document.getElementById('mapMove'); b.hidden=false; b.onclick=function(){ if(m.dragging.enabled()){ m.dragging.disable(); b.textContent='Move map'; } else { m.dragging.enable(); b.textContent='Lock map'; } }; }
+    m.on('click',function(e){ var p=e.latlng; q('ReportLayers/MapServer/2',{geometry:p.lng+','+p.lat,geometryType:'esriGeometryPoint',inSR:4326,spatialRel:'esriSpatialRelIntersects',outFields:'Site_Address',returnGeometry:'false'}).then(function(j){ var f=j.features&&j.features[0]; if(f&&f.properties.Site_Address) onPick(f.properties.Site_Address); else MAP.msg('No addressed parcel there.'); }).catch(function(){ MAP.msg('City map service did not respond.'); }); });
+  }
+  function show(addr,onPick){
+    return load().then(function(){
+      init(onPick); grp.clearLayers(); MAP.msg('Loading City map layers…');
+      return q('ReportLayers/MapServer/2',{where:"Site_Address='"+addr.replace(/'/g,"''")+"'",outFields:'Site_Address',returnGeometry:'true'}).then(function(j){
+        if(!j.features||!j.features.length){ MAP.msg('This lot is not on the City parcel map.'); return; }
+        var par=L.geoJSON(j,{style:{color:'#ff7a1a',weight:3,fillOpacity:0.12}}).addTo(grp), bb=par.getBounds(), big=bb.pad(1.2);
+        m.fitBounds(bb.pad(0.9),{maxZoom:19});
+        var env=[big.getWest(),big.getSouth(),big.getEast(),big.getNorth()].join(','), g={geometry:env,geometryType:'esriGeometryEnvelope',inSR:4326,spatialRel:'esriSpatialRelIntersects',returnGeometry:'true'};
+        return Promise.all([
+          q('Grp_Transportation/MapServer/34',Object.assign({where:'1=1',outFields:'Name,ST_Class'},g)).then(function(s){ L.geoJSON(s,{style:{color:'#ffffff',weight:2,dashArray:'6 6',opacity:0.9},onEachFeature:function(f,l){ if(f.properties.Name) l.bindTooltip(f.properties.Name+(f.properties.ST_Class?' · '+f.properties.ST_Class:''),{sticky:true}); }}).addTo(grp); }),
+          q('Grp_Transportation/MapServer/16',Object.assign({where:'1=1',outFields:'STREETNAME,INCOMPLETE,WIDTH'},g)).then(function(w){ L.geoJSON(w,{style:function(f){ var inc=String(f.properties.INCOMPLETE||'').toUpperCase(); return {color:(inc==='YES'||inc==='Y')?'#ffcc00':'#22c55e',weight:5,opacity:0.95}; },onEachFeature:function(f,l){ l.bindTooltip('Sidewalk'+(f.properties.STREETNAME?' · '+f.properties.STREETNAME:'')+(f.properties.WIDTH?' · '+f.properties.WIDTH+' ft':''),{sticky:true}); }}).addTo(grp); })
+        ]).then(function(){ par.bringToFront(); MAP.msg('Tap any parcel to load it. No green line along an edge means no mapped sidewalk.'); });
+      });
+    }).catch(function(){ MAP.msg('Map could not load. The cost tool still works.'); });
+  }
+  return {show:show, msg:function(t){ var e=document.getElementById('mapMsg'); if(e) e.textContent=t; }};
+})();
 /* ---------- UI v4: lot -> city -> reading -> all cities; adjustments folded ---------- */
 (function(){
   var $=function(id){ return document.getElementById(id); };
-  var STORE='hdip-fil-v17', state;
+  var STORE='hdip-fil-v18', state;
   var LOT={
     hdip3:['2729 Peabody St','HDIP-0003, full scope as first required','Four small lots with four ADUs. Sidewalk and one ramp on W Maryland St (curb and gutter already exist), plus the corner curb extension staff later removed.'],
     hdip4:['3605 Mill Ave','HDIP-0004, the edge case','One home on a corner lot with two unimproved streets, one of them an arterial. The builder did not proceed.'],
@@ -696,7 +741,9 @@ var ELIG = [
     state.caseNote='From City maps, November 20, 2026. '+L[1].toLocaleString()+' sq ft'+(L[2]?', '+L[2]+' ft of alley':'')+'. Maps show sidewalks only: curb, ramps, lights and "Req\'d" are guesses to correct.';
     $('addr').value=''; $('addrList').innerHTML=''; $('addrMsg').textContent='';
     renderLots(); renderLot(); render();
+    MAP.show(L[0],pickByAddr);
   }
+  function pickByAddr(a){ getLots().then(function(j){ var A=String(a).toUpperCase().trim(); for(var i=0;i<j.lots.length;i++){ if(j.lots[i][0]===A){ pickLot(j,i); return; } } MAP.msg(tc(A)+': no street frontage on the City map, so it is not in the cost list.'); }); }
 
   /* lot editor */
   function renderLot(){
@@ -889,6 +936,7 @@ var ELIG = [
     $('addFront').addEventListener('click',function(){ if(state.frontages.length>=6) return; state.frontages.push(F('Street '+(state.frontages.length+1),50,'local',true,false,false,true)); edited(); renderLot(); render(); });
     ['ramps','lights','curbExt','alleySf','constrValue','width'].forEach(function(k){ $(k).addEventListener('input',function(){ state[k]=parseFloat($(k).value)||0; if(k!=='width'&&k!=='constrValue') edited(); render(); }); });
     document.querySelectorAll('.outs .info').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); b.closest('.out').classList.toggle('open'); }); });
+    $('mapOpen').addEventListener('click',function(){ MAP.show(state&&state.origin==='maps'?state.caseName.toUpperCase():'3605 MILL AVE',pickByAddr); });
     $('cityMarkup').addEventListener('input',function(){ var v=parseFloat($('cityMarkup').value); state.cityMarkup=isNaN(v)?null:v; render(false); });
     $('use').addEventListener('change',function(){ state.use=$('use').value; render(); });
     document.querySelectorAll('[name=step]').forEach(function(x){ x.addEventListener('change',function(){ state.step=x.value; render(); }); });
