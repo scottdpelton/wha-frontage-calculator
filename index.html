@@ -98,6 +98,7 @@ input[type=checkbox],input[type=radio]{width:17px;height:17px;accent-color:var(-
 .tr2 span{display:block}
 .tr2 #rLot{font-weight:600;font-size:15px}
 .title .src{color:inherit}
+.tradeoff{margin:0 0 8px;font-size:14px;color:var(--muted);line-height:1.4}
 .outs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);border-radius:6px;overflow:hidden}
 .out{padding:10px 12px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--soft)}
 .out:nth-child(3n){border-right:0}.out:nth-last-child(-n+3){border-bottom:0}
@@ -229,13 +230,14 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
   <div>
     <section class="panel" id="reading" aria-live="polite">
       <div class="title"><div><span class="tl">Result under the rules of</span><b id="rHead"></b></div><div class="tr2"><span id="rLot"></span><span id="mMeta"></span></div></div>
+      <p class="tradeoff">The trade-off: the developer either builds the street work, or (where a city allows it) pays a one-time fee and the city builds it later.</p>
       <div class="outs">
-        <div class="out key"><div class="l">Fee for this lot</div><div class="v" id="rFee"></div><div class="s" id="rFeeS"></div></div>
-        <div class="out"><div class="l">Fee per frontage foot</div><div class="v" id="rPerFt"></div><div class="s" id="rPerFtS"></div></div>
-        <div class="out" id="oSave"><div class="l">Developer saves vs building</div><div class="v" id="rSave"></div><div class="s" id="rSaveS"></div></div>
-        <div class="out" id="oCost"><div class="l">Cost to build, developer</div><div class="v" id="rCost"></div><div class="s"><span id="rCostS"></span> <button type="button" class="link" id="goCost">Unit costs</button></div></div>
-        <div class="out" id="oPct"><div class="l">Fee as share of that cost</div><div class="v" id="rPct"></div><div class="s" id="rPctS"></div></div>
-        <div class="out" id="oGap"><div class="l">Shortfall the City covers</div><div class="v" id="rGap"></div><div class="s" id="rGapS"></div></div>
+        <div class="out key"><div class="l">Fee instead of building</div><div class="v" id="rFee"></div><div class="s" id="rFeeS"></div></div>
+        <div class="out" id="oCost"><div class="l">Cost if the developer builds it</div><div class="v" id="rCost"></div><div class="s"><span id="rCostS"></span> <button type="button" class="link" id="goCost">Unit costs</button></div></div>
+        <div class="out" id="oSave"><div class="l">Developer saves by paying the fee</div><div class="v" id="rSave"></div><div class="s" id="rSaveS"></div></div>
+        <div class="out" id="oPct"><div class="l">Share of the work the fee pays for</div><div class="v" id="rPct"></div><div class="s" id="rPctS"></div></div>
+        <div class="out" id="oGap"><div class="l">Left for the City to fund later</div><div class="v" id="rGap"></div><div class="s" id="rGapS"></div></div>
+        <div class="out"><div class="l">Fee per foot of street</div><div class="v" id="rPerFt"></div><div class="s" id="rPerFtS"></div></div>
       </div>
       <p class="rnote" id="rNote" hidden></p>
       <div class="basis"><span class="bl">Based on</span><ul id="basis"></ul></div>
@@ -745,23 +747,23 @@ var ELIG = [
     var scope=parts.length?parts.join(', '):'no frontage work';
     $('lotScope').textContent=scope;
     $('rHead').textContent=nm(c); $('rLot').textContent=s.caseName;
-    $('rFee').textContent=isB?'$0':feeTxt;
+    $('rFee').textContent=isB?'None':feeTxt;
     $('rSent').textContent=isB? 'Bellingham has no fee option today. The developer builds '+scope+' and the City collects nothing.'
       : 'A one-time fee to the City, paid instead of building '+scope+'.'+(tracks(r)?' It is a range because this city sets the fee from the cost to build, and the unit costs here are a low and a high.':'')+(c.group==='caution'?' Nashville stopped collecting its fee after a 2023 appeals ruling; it is shown as a caution, not a model.':c.conf==='unclear'?' Olympia\'s listing is ambiguous; confirm with Olympia before citing.':'');
     var RL=sumLen(reqF(s)), sh=isB?null:shareOf(r,C);
-    $('rFeeS').textContent=isB?'no fee option; developer builds':'one-time, instead of building';
-    $('rPerFt').textContent=(isB||r.lo==null||!RL)?'n/a':usdR(r.lo/RL,r.hi/RL);
-    $('rPerFtS').textContent='over '+ft(RL)+' owed';
+    $('rFeeS').textContent=isB?'Bellingham has no fee option, so the developer must build':'paid once; the developer skips building';
+    $('rPerFt').textContent=isB?'None':(r.lo==null||!RL)?'n/a':usdR(r.lo/RL,r.hi/RL);
+    $('rPerFtS').textContent=isB?'no fee to divide':'the fee divided by '+ft(RL)+' of street with work owed';
     $('rCost').textContent=C.lo==null?'Not priced':usdR(C.lo,C.hi)+(C.partial?'+':'');
-    $('rCostS').textContent=C.partial?'low estimate':'';
-    $('rPct').textContent=isB?'n/a':!sh?'Not known':(sh[0]===sh[1]?sh[0]+'%':sh[0]+'% to '+sh[1]+'%');
-    $('rPctS').textContent=isB?'':!sh?'needs a cost to build':C.partial?'high estimate':'';
+    $('rCostS').textContent=C.lo==null?'no costs set':'construction, design and City deposit'+(C.partial?'; low, since some items are unpriced':'')+'.';
+    $('rPct').textContent=isB?'None':!sh?'Not known':(sh[0]===sh[1]?sh[0]+'%':sh[0]+'% to '+sh[1]+'%');
+    $('rPctS').textContent=isB?'no fee, so the developer pays 100% by building':!sh?'needs a cost to build':'fee ÷ cost to build; under 100% means the City must fund the rest'+(C.partial?' (reads high: some items unpriced)':'');
     var sv=diffTxt(diff(r,C),C.partial);
-    $('rSave').textContent=isB?'$0':C.lo==null?'Not known':sv;
-    $('rSaveS').textContent=isB?'no fee option':C.lo==null?'needs a cost to build':c.conf==='cost'?'saves time and bonding only':sv==='None'&&!isB?'fee exceeds building':C.partial?'low estimate':''; $('oSave').classList.toggle('dim',C.lo==null);
+    $('rSave').textContent=isB?'None':C.lo==null?'Not known':sv;
+    $('rSaveS').textContent=isB?'no fee option, so nothing to save':C.lo==null?'needs a cost to build':c.conf==='cost'?'fee equals the cost, so it saves only time and bonding':sv==='None'?'the fee costs more than building':'cost to build minus the fee'+(C.partial?' (reads low: some items unpriced)':''); $('oSave').classList.toggle('dim',C.lo==null);
     var gp=CC?diffTxt(diff(r,CC),C.partial):null;
-    $('rGap').textContent=isB?'$0':CC?gp:'Not known';
-    $('rGapS').textContent=isB?'developer builds everything':CC?'City\'s later cost minus fee':'set the City\'s cost in Unit costs';
+    var dC=diff(r,C); $('rGap').textContent=isB?'$0':CC?gp:dC?(dC[1]<=0?'$0':'At least '+usd(Math.max(0,dC[0]))):'Not known';
+    $('rGapS').textContent=isB?'the developer builds it all now':CC?'what the City would spend building it later, minus the fee it collected':dC?'if the City builds it for what a developer would pay; City projects usually cost more':'enter what the City would pay to build it, under Unit costs';
     var ref=$('rRef'); if(s.reported){ ref.hidden=false; ref.textContent='Builder-reported cost for this work: '+usd(s.reported[0])+' to '+usd(s.reported[1])+'. Unverified; not used above.'; } else ref.hidden=true;
     var miss=C.items.filter(function(it){return !it.priced;}).map(function(it){return it.label;});
     var nt=$('rNote'); if(C.partial&&!isB){ nt.hidden=false; nt.innerHTML='<b>+</b><span>Not priced yet: '+esc(miss.join(', '))+'. So cost and savings read low, and the share reads high. Price it under Unit costs.</span>'; } else nt.hidden=true;
