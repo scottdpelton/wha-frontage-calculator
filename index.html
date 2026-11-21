@@ -219,7 +219,7 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
 #ft input,#ft select{font-size:16px}
 }
 .br>span:first-child,.bgh>b,.rh>b,.bt>span{min-width:0;flex:1 1 auto}.br>span:last-child,.bgh>span,.rt{flex:0 0 auto;text-align:right}
-#map{height:320px;border-radius:8px;margin-top:8px;border:1px solid var(--line)}@media(max-width:620px){#map{height:280px}}
+#map{height:360px;border-radius:8px;margin-top:8px;border:1px solid var(--line)}@media(max-width:620px){#map{height:320px}}
 .mapwrap{position:relative}.mapmove{position:absolute;left:8px;bottom:26px;z-index:500;font-size:13px;padding:4px 10px}
 .mapmsg{font-size:13px;margin:6px 0 0}.mapkey{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--muted);margin-top:4px}.mapkey i{display:inline-block;width:14px;height:4px;border-radius:2px;margin-right:5px;vertical-align:middle}.mapkey i.dash{background:repeating-linear-gradient(90deg,#999 0 4px,transparent 4px 7px)}
 .leaflet-control-attribution{font-size:10px!important;max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -240,10 +240,9 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
         <label for="addr">Look up any Bellingham address</label>
         <input id="addr" type="text" placeholder="Type an address, e.g. 3605 Mill Ave" autocomplete="off" spellcheck="false">
         <div id="addrList"></div><p class="muted" id="addrMsg" role="status"></p>
-        <button type="button" class="link" id="mapOpen">Or pick a lot on the map</button>
-        <div class="mapwrap"><div id="map" hidden></div><button type="button" class="btn mapmove" id="mapMove" hidden>Move map</button></div>
+        <div class="mapwrap"><div id="map"></div><button type="button" class="btn mapmove" id="mapMove" hidden>Move map</button></div>
         <p class="muted mapmsg" id="mapMsg" role="status"></p>
-        <div id="mapKey" class="mapkey" hidden><span><i style="background:#ff7a1a"></i>Parcel</span><span><i style="background:#22c55e"></i>Sidewalk</span><span><i style="background:#ffcc00"></i>Incomplete</span><span><i class="dash"></i>Street center</span></div>
+        <div id="mapKey" class="mapkey"><span><i style="background:#ff7a1a"></i>Parcel</span><span><i style="background:#22c55e"></i>Sidewalk</span><span><i style="background:#ffcc00"></i>Incomplete</span><span><i class="dash"></i>Street center</span></div>
       </div>
       <h2 style="margin-top:14px">or use a documented case</h2>
       <div class="lots" id="lotBtns"></div>
@@ -641,7 +640,7 @@ var MAP=(function(){
   function load(){ if(!ready){ css('leaflet/leaflet.css'); ready=js('leaflet/leaflet.js'); } return ready; }
   function q(path,p){ var u=B+path+'/query?'+Object.keys(p).map(function(k){return k+'='+encodeURIComponent(p[k]);}).join('&')+'&outSR=4326&f=geojson'; return fetch(u).then(function(r){ if(!r.ok) throw 0; return r.json(); }); }
   function init(onPick){
-    var el=document.getElementById('map'); el.hidden=false; document.getElementById('mapKey').hidden=false;
+    var el=document.getElementById('map');
     if(m) return;
     var touch=('ontouchstart' in window);
     m=L.map(el,{scrollWheelZoom:false,dragging:!touch,tap:false,zoomSnap:0.5}).setView([48.7519,-122.4787],13);
@@ -655,8 +654,11 @@ var MAP=(function(){
   }
   function show(addr,onPick){
     return load().then(function(){
-      init(onPick); grp.clearLayers(); MAP.msg('Loading City map layers…');
-      return q('ReportLayers/MapServer/2',{where:"Site_Address='"+addr.replace(/'/g,"''")+"'",outFields:'Site_Address',returnGeometry:'true'}).then(function(j){
+      init(onPick); grp.clearLayers();
+      if(!addr){ m.setView([48.7519,-122.4787],13); MAP.msg('Tap any parcel to load it into the calculator.'); return; }
+      MAP.msg('Loading City map layers…');
+      var wh=addr.indexOf('PC:')===0?"PARCEL_CODE='"+addr.slice(3)+"'":"Site_Address='"+addr.replace(/'/g,"''")+"'";
+      return q('ReportLayers/MapServer/2',{where:wh,outFields:'Site_Address',returnGeometry:'true'}).then(function(j){
         if(!j.features||!j.features.length){ MAP.msg('This lot is not on the City parcel map.'); return; }
         var par=L.geoJSON(j,{style:{color:'#ff7a1a',weight:3,fillOpacity:0.12}}).addTo(grp), bb=par.getBounds(), big=bb.pad(1.2);
         m.fitBounds(bb.pad(0.9),{maxZoom:19});
@@ -699,7 +701,7 @@ var MAP=(function(){
   /* pickers */
   function renderLots(){
     $('lotBtns').innerHTML=CASE_ORDER.map(function(id){ return '<button type="button" class="pick'+(id===state.caseId?' on':'')+'" data-lot="'+id+'" aria-pressed="'+(id===state.caseId)+'"><b>'+esc(LOT[id][0])+'</b><span>'+esc(LOT[id][1])+'</span></button>'; }).join('');
-    $('lotBtns').querySelectorAll('[data-lot]').forEach(function(b){ b.addEventListener('click',function(){ var id=b.getAttribute('data-lot'); loadCase(id); renderLots(); renderLot(); render();  }); });
+    $('lotBtns').querySelectorAll('[data-lot]').forEach(function(b){ b.addEventListener('click',function(){ var id=b.getAttribute('data-lot'); loadCase(id); renderLots(); renderLot(); render(); syncMap();  }); });
     $('lotBrief').textContent=state.brief||LOT[state.caseId][2];
   }
   function renderCities(){
@@ -743,6 +745,8 @@ var MAP=(function(){
     renderLots(); renderLot(); render();
     MAP.show(L[0],pickByAddr);
   }
+  function mapAddr(){ if(!state) return null; if(state.origin==='maps') return state.caseName.toUpperCase(); return {hdip3:'PC:380319019221',hdip4:'3605 MILL AVE',hdip4b:'3605 MILL AVE'}[state.caseId]||null; }
+  function syncMap(){ MAP.show(mapAddr(),pickByAddr); }
   function pickByAddr(a){ getLots().then(function(j){ var A=String(a).toUpperCase().trim(); for(var i=0;i<j.lots.length;i++){ if(j.lots[i][0]===A){ pickLot(j,i); return; } } MAP.msg(tc(A)+': no street frontage on the City map, so it is not in the cost list.'); }); }
 
   /* lot editor */
@@ -933,17 +937,17 @@ var MAP=(function(){
     bar(); window.addEventListener('resize',bar); if(window.ResizeObserver){ var cro=new ResizeObserver(bar); cro.observe(document.querySelector('.citybar')); }
     if(!restore()){ state=blank(); loadCase('hdip3'); }
     all();
+    syncMap();
     $('addFront').addEventListener('click',function(){ if(state.frontages.length>=6) return; state.frontages.push(F('Street '+(state.frontages.length+1),50,'local',true,false,false,true)); edited(); renderLot(); render(); });
     ['ramps','lights','curbExt','alleySf','constrValue','width'].forEach(function(k){ $(k).addEventListener('input',function(){ state[k]=parseFloat($(k).value)||0; if(k!=='width'&&k!=='constrValue') edited(); render(); }); });
     document.querySelectorAll('.outs .info').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); b.closest('.out').classList.toggle('open'); }); });
-    $('mapOpen').addEventListener('click',function(){ MAP.show(state&&state.origin==='maps'?state.caseName.toUpperCase():'3605 MILL AVE',pickByAddr); });
     $('cityMarkup').addEventListener('input',function(){ var v=parseFloat($('cityMarkup').value); state.cityMarkup=isNaN(v)?null:v; render(false); });
     $('use').addEventListener('change',function(){ state.use=$('use').value; render(); });
     document.querySelectorAll('[name=step]').forEach(function(x){ x.addEventListener('change',function(){ state.step=x.value; render(); }); });
     document.querySelectorAll('[name=paRead]').forEach(function(x){ x.addEventListener('change',function(){ state.paReading=x.value; render(); }); });
     $('mReset').addEventListener('click',function(){ delete state.cityOv[state.cityId]; renderMethod(); render(); });
     $('ratesReset').addEventListener('click',function(){ state.rates=freshRates(); state.cityMarkup=null; $('cityMarkup').value=''; render(); });
-    $('resetAll').addEventListener('click',function(){ state=null; state=blank(); loadCase('hdip3'); all(); $('copyMsg').textContent='Reset'; });
+    $('resetAll').addEventListener('click',function(){ state=null; state=blank(); loadCase('hdip3'); all(); $('copyMsg').textContent='Reset'; syncMap(); });
     $('copySum').addEventListener('click',function(){ copy(reading(),'copyMsg','Copied'); });
     $('copyCode').addEventListener('click',function(){ copy(code(),'shareMsg','Case code copied. Paste it into an email.'); });
     $('loadCode').addEventListener('click',function(){ try{ state=Object.assign(blank(),fromCode($('codeIn').value)); all(); $('shareMsg').textContent='Case loaded.'; }catch(e){ $('shareMsg').textContent='That code did not load. Check it was copied whole.'; } });
