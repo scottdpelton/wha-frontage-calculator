@@ -755,6 +755,8 @@ var MAP=(function(){
     state.frontages=L[3].map(function(f){ var w=f[3]>0; return F((j.streets[f[0]]==='Unmapped right-of-way'?'Right-of-way with no mapped street':tc(j.streets[f[0]]))+(f[3]===2?' (sidewalk marked incomplete)':''),f[1],f[2]?'arterial':'local',!!f[4],false,w,!w); });
     state.brief=name+', a first draft read from the City\'s public maps. Correct it under "Edit the lot".';
     state.caseNote='From City maps, November 20, 2026. '+L[1].toLocaleString()+' sq ft'+(L[2]?', '+L[2]+' ft of alley':'')+'. Maps show sidewalks only: curb, ramps, lights and "Req\'d" are guesses to correct.';
+    var stn=L[0].split(' ').slice(1).join(' '), have=L[3].some(function(f){ var n=String(j.streets[f[0]]).toUpperCase(); return n===stn||n.indexOf(stn)>=0||stn.indexOf(n)>=0; });
+    if(!have) state.caseNote+=' Check: the map read found no frontage on '+tc(stn)+', the street in the address. If the lot touches it, use "Add street".';
     $('addr').value=''; $('addrList').innerHTML=''; $('addrMsg').textContent='';
     renderLots(); renderLot(); render();
     MAP.show(L[0],pickByAddr);
@@ -904,7 +906,7 @@ var MAP=(function(){
     $('rGapS').textContent=isB?'the developer builds it all now':CC?'what the City would spend building it later (the developer\'s cost plus '+(m!=null?m:CITY_CM.lo+'–'+CITY_CM.hi)+'% construction management), minus the fee':dC?'if the City builds it for what a developer would pay; City projects usually cost more':'enter what the City would pay to build it, under Unit costs';
     var ref=$('rRef'); if(s.reported){ ref.hidden=false; ref.textContent='Builder-reported cost for this work: '+usd(s.reported[0])+' to '+usd(s.reported[1])+'. Unverified; not used above.'; } else ref.hidden=true;
     var miss=C.items.filter(function(it){return !it.priced;}).map(function(it){return it.label;});
-    var nt=$('rNote'); if(C.partial&&!isB){ nt.hidden=false; nt.innerHTML='<b>+</b><span>Not priced: '+esc(miss.join(', '))+'. Costs read low.</span>'; } else nt.hidden=true;
+    var nt=$('rNote'); if(!RL&&!isB){ nt.hidden=false; nt.innerHTML='<b>!</b><span>No frontage work is marked as owed on this lot, so every city shows $0. On lots read from the City map, a street with mapped sidewalk is assumed done. Tick "Req\'d" on any street the City would still require.</span>'; } else if(C.partial&&!isB){ nt.hidden=false; nt.innerHTML='<b>+</b><span>Not priced: '+esc(miss.join(', '))+'. Costs read low.</span>'; } else nt.hidden=true;
     $('mHowName').textContent=nm(c);
     $('mMath').textContent=r.lines.join('\n');
     var G=[['Construction',function(k){return !PCT_KEYS[k]&&k!=='asbuilt'&&k!=='swpermit';}],['Contractor overhead and record drawings',function(k){return k==='overhead'||k==='asbuilt';}],['Design, bond and contingency',function(k){return k==='design'||k==='bond'||k==='contingency';}],['City fees',function(k){return k==='admin'||k==='swpermit';}]];
