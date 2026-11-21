@@ -294,7 +294,7 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
       <div class="rowb" style="justify-content:flex-start"><button type="button" class="btn" id="loadCode">Load code</button></div>
     </div></details>
   </div>
-  <footer>Working draft. City rules and sources checked November 20, 2026. Bellingham has not supplied unit costs, so cost to build uses the average of three 2025 Whatcom County bids (Ferndale, Lynden), bid items only, no soft costs. Every rate is editable under Unit costs. Illustration for HDIP Task Force discussion by the Whatcom Housing Alliance, a housing-advocacy organization. Not a City figure or a proposed rate. Each method links to the city's code, fee schedule or official page; Brookhaven's increase and Nashville's halt are also sourced to news reports. Assumptions are labeled in each method. Legal questions go to the City Attorney.</footer>
+  <footer>Working draft. City rules and sources checked November 20, 2026. Bellingham has not supplied unit costs, so cost to build uses the average of three 2025 Whatcom County bids (Ferndale, Lynden), bid items only, no soft costs. Paving and stormwater also rest on an assumed street section, width and drainage design, labeled under Unit costs. Every rate is editable under Unit costs. Illustration for HDIP Task Force discussion by the Whatcom Housing Alliance, a housing-advocacy organization. Not a City figure or a proposed rate. Each method links to the city's code, fee schedule or official page; Brookhaven's increase and Nashville's halt are also sourced to news reports. Assumptions are labeled in each method. Legal questions go to the City Attorney.</footer>
 </div>
 <div hidden><span id="lotBrief"></span><span id="rSent"></span><span id="howT"></span><span id="dLot"></span></div>
 <script>
@@ -318,6 +318,7 @@ var CONF = {
   unpriced:{t:'Not priced',c:'ill'},
   unclear:{t:'Listing unclear',c:'ill'},
   invalidated:{t:'Not collected since 2023',c:'bad'},
+  assumed:{t:'Whatcom bids + assumed design',c:'ill'},
   builder:{t:'Builder-reported',c:'bad'},
   baseline:{t:'Current practice',c:'base'}
 };
@@ -331,14 +332,18 @@ var RATE_DEFAULTS = {
   curbGutter:{label:'Curb and gutter',unit:'per ft of frontage',lo:47,hi:47,conf:'comparable',
     src:'Average of three 2025 Whatcom County low bids for cement concrete traffic curb and gutter: Ferndale Terrace $36/ft (5,460 ft), Lynden Bradley Rd $46 (2,650 ft), Lynden 1st and Main $59 (weighted, 405 ft). Average $47/ft. Range $36 to $62. Small runs cost more per foot. Cross-check: WSDOT median $52. Bid-item prices only.',
     links:[{t:'Ferndale Terrace certified bid tab (Feb 2025)',u:'https://cityofferndale.org/DocumentCenter/View/1093/250221-FT-Bid-Tab-Signed-Sealed-PDF'},{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'},{t:'Lynden 1st and Main Overlay certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2545'}]},
-  paving:{label:'Street paving to three-quarter standard',unit:'per ft of frontage',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
+  paving:{label:'Street paving to three-quarter standard',unit:'per ft of frontage',lo:88,hi:103,conf:'assumed',
+    src:'Bid prices: averages of three 2025 Whatcom County low bids. HMA Cl. 1/2 in. $124 / $122 / $150 per ton (avg $132). Crushed surfacing top course $60 / $48 / $73 per ton (avg $60.33). Gravel base or borrow $23.50 / $17 / $21 per ton (avg $20.50). Roadway excavation incl. haul $36 / $20 / $32 per cu yd (avg $29.33). ASSUMED, not from Bellingham: a section of 3 in. asphalt over 2 in. crushed top course and 6 in. gravel base, dug 11 in. deep; 145 lb/cu ft for asphalt and 2 tons/cu yd for rock. That is about $4.89 per sq ft of new street. ASSUMED width: 18 to 21 ft of new pavement per foot of frontage (three-quarters of a 24 to 28 ft local street). Result $88 to $103 per ft. Confirm section and width against Bellingham Engineering Design Standards. Bid-item prices only.',
+    links:[{t:'Ferndale Terrace certified bid tab (Feb 2025)',u:'https://cityofferndale.org/DocumentCenter/View/1093/250221-FT-Bid-Tab-Signed-Sealed-PDF'},{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'},{t:'Lynden 1st and Main Overlay certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2545'}]},
   ramp:{label:'Curb ramp',unit:'each',lo:3109,hi:3109,conf:'comparable',
     src:'Average of three 2025 Whatcom County low bids for cement concrete curb ramps (quantity-weighted within each contract): Ferndale Terrace $3,903, Lynden Bradley Rd $2,724, Lynden 1st and Main $2,700. Average $3,109 each. Range $2,500 to $4,000. Cross-check: WSDOT median $2,600. Bid-item prices only.',
     links:[{t:'Ferndale Terrace certified bid tab (Feb 2025)',u:'https://cityofferndale.org/DocumentCenter/View/1093/250221-FT-Bid-Tab-Signed-Sealed-PDF'},{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'},{t:'Lynden 1st and Main Overlay certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2545'}]},  light:{label:'Street light',unit:'each',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost. WSDOT bids lighting as lump-sum systems, so no per-light price can be drawn from its bid tabs.'},
   curbExt:{label:'Curb extension at an intersection',unit:'each',lo:10000,hi:20000,conf:'consultant',
     src:'AVT Consulting estimate for 2729 Peabody St (HDIP-0003 intake), for the curb extension required in the second round of PFC review. Staff later agreed to remove it.'},
   alley:{label:'Alley widening',unit:'per sq ft',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
-  storm:{label:'Stormwater for new street area',unit:'allowance per case',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works allowance.'}
+  storm:{label:'Stormwater for new street',unit:'per ft of new street',lo:66,hi:129,conf:'assumed',
+    src:'Bid prices: averages of 2025 Whatcom County low bids. 12 in. corrugated polyethylene storm pipe $54 (Ferndale) / $35.33 (Lynden Bradley Rd) per ft, avg $44.67. Type 1 catch basin $2,575 / $1,250 / $2,500, avg $2,108. Infiltration trench $44 (Ferndale) / $81.61 (Bradley Rd, 5 ft), avg $62.81 per ft. ASSUMED design, not from Bellingham: one foot of pipe per foot of new street plus one catch basin per 100 ft ($21/ft) = $66/ft for conveyance only; add one foot of infiltration trench per foot for on-site treatment = $129/ft. Real need depends on the site drainage report and soils. Bid-item prices only.',
+    links:[{t:'Ferndale Terrace certified bid tab (Feb 2025)',u:'https://cityofferndale.org/DocumentCenter/View/1093/250221-FT-Bid-Tab-Signed-Sealed-PDF'},{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'},{t:'Lynden 1st and Main Overlay certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2545'}]}
 };
 var RATE_ORDER = ['sidewalk','curbGutter','paving','ramp','light','curbExt','alley','storm'];
 
@@ -355,7 +360,7 @@ function quantities(s){
     paving: sumLen(R.filter(function(f){return !f.paved;})),
     ramp: s.ramps||0, light: s.lights||0, curbExt: s.curbExt||0,
     alley: s.alleySf||0,
-    storm: R.some(function(f){return !f.paved;}) ? 1 : 0
+    storm: sumLen(R.filter(function(f){return !f.paved;}))
   };
 }
 function costToBuild(s){
@@ -545,7 +550,7 @@ var ELIG = [
 /* ---------- UI v4: lot -> city -> reading -> all cities; adjustments folded ---------- */
 (function(){
   var $=function(id){ return document.getElementById(id); };
-  var STORE='hdip-fil-v9', state;
+  var STORE='hdip-fil-v10', state;
   var LOT={
     hdip3:['2729 Peabody St','HDIP-0003, full scope as first required','Four small lots with four ADUs. Sidewalk and one ramp on W Maryland St (curb and gutter already exist), plus the corner curb extension staff later removed.'],
     hdip4:['3605 Mill Ave','HDIP-0004, the edge case','One home on a corner lot with two unimproved streets, one of them an arterial. The builder did not proceed.'],
@@ -751,7 +756,8 @@ var ELIG = [
     B.push(s.origin==='docs'?[ed?'w':'','Lengths',ed?'City documents, then edited':'City documents and parcel map',ed?'edited':'City docs']:s.origin==='maps'?[ed?'w':'','Lengths',ed?'City parcel map, then edited':'City parcel map',ed?'edited':'parcel map']:['n','Lengths','entered by you','your entry']);
     B.push(s.origin==='docs'?[ed?'w':'','Scope',ed?'curb, sidewalk, ramps from the pre-application letter, then edited':'curb, sidewalk, ramps from the pre-application letter',ed?'edited':'pre-app letter']:s.origin==='maps'?['w','Scope','sidewalk from City map; curb and ramps are guesses','partly guessed']:['n','Scope','entered by you','your entry']);
     var np=C.items.filter(function(it){return it.priced;}).length;
-    B.push(C.lo==null?['b','Cost','no element priced','none priced']:C.partial?['w','Cost',np+' of '+C.items.length+' elements priced, from Whatcom County bids',np+' of '+C.items.length+' priced']:['w','Cost','all elements priced from Whatcom County bids and a consultant estimate; Bellingham has not supplied costs','Whatcom bids']);
+    var asm=C.items.some(function(it){return it.priced && s.rates[it.k].conf==='assumed';});
+    B.push(C.lo==null?['b','Cost','no element priced','none priced']:C.partial?['w','Cost',np+' of '+C.items.length+' elements priced, from Whatcom County bids'+(asm?'; paving and stormwater use assumed designs':''),np+' of '+C.items.length+' priced']:['w','Cost','all elements priced from Whatcom County bids'+(asm?', with assumed paving and stormwater designs':'')+'; Bellingham has not supplied costs','Whatcom bids'+(asm?' + assumptions':'')]);
     B.push(CC?['n','City cost','your entry, +'+m+'%','+'+m+'%']:['b','City cost','not set, so no shortfall','not set']);
     $('basis').innerHTML=B.map(function(x){ return '<li class="'+x[0]+'" tabindex="0" title="'+esc(x[1]+': '+x[2])+'"><b>'+x[1]+'</b> '+esc(x[3])+'</li>'; }).join('');
     $('oCost').classList.toggle('dim',C.lo==null); $('oPct').classList.toggle('dim',isB||!sh); $('oGap').classList.toggle('dim',!isB&&!CC);
