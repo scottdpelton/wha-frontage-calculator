@@ -75,6 +75,7 @@ td input[type=text],td input[type=number],td select,.fld input,.fld select{paddi
 #ft{table-layout:fixed;min-width:440px}#ft input[type=text],#ft input[type=number],#ft select{width:100%}#ft select{padding-inline:3px}
 #ft th,#ft td{padding-inline:3px}
 #ft th:nth-child(2){width:78px}#ft th:nth-child(3){width:90px}#ft th.c{width:42px}#ft th:last-child{width:28px}
+@media(max-width:480px){#ft{min-width:0}#ft th:nth-child(2){width:62px}#ft th:nth-child(3){width:78px}#ft th.c{width:34px}#ft th:last-child{width:24px}#ft th{font-size:12px}}
 input[type=checkbox],input[type=radio]{width:17px;height:17px;accent-color:var(--acc)}
 .x{width:26px;height:26px;border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer}
 .x:hover{color:var(--bad)}
@@ -191,11 +192,33 @@ legend{font-size:13px;color:var(--muted);padding:0 6px 0 0}
 .v-yes{background:color-mix(in srgb,var(--good) 14%,transparent);color:var(--good)}
 .v-no{background:color-mix(in srgb,var(--bad) 14%,transparent);color:var(--bad)}
 .v-unk{background:var(--soft);color:var(--muted)}
-#rates{min-width:720px}#rates td small{display:block;color:var(--muted);font-size:12.5px}#rates input[type=number]{width:96px}
-#rates .srcnote{display:block;width:100%;margin:3px 0 0;font-size:13px}
-#rates tr.off{color:var(--muted)}#rates tr.on td:first-child b{box-shadow:inset 0 -2px var(--acc)}
 textarea{width:100%;min-height:56px;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--soft);font:12.5px ui-monospace,Menlo,monospace}
 footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px}
+
+#rates{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.rc{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--soft)}
+.rc.off{opacity:.6}
+.rh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.rh b{font-weight:600;line-height:1.25}.rt{font-weight:600;white-space:nowrap}
+.rq{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.rin{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}.rin label{display:flex;flex-direction:column;font-size:12px;color:var(--muted)}.rin input{width:96px;font-size:16px;padding:6px}.rin small{font-size:12px;color:var(--muted)}
+.rm{font-size:13.5px;line-height:1.45;margin-top:8px}.rm span,.rlinks span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.rlinks{margin-top:6px;font-size:13px}.rlinks a{display:block;color:inherit;text-decoration:underline;text-underline-offset:2px;margin:2px 0;overflow-wrap:anywhere}
+.rd{margin-top:6px;font-size:13px}.rd summary{cursor:pointer;color:var(--muted)}.rd p{margin:6px 0 0;line-height:1.45}
+.bdh{margin:14px 0 6px;font-size:15px}
+.bg{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;overflow:hidden}
+.bgh{display:flex;justify-content:space-between;padding:8px 12px;background:var(--soft);font-size:14px}
+.br{display:flex;justify-content:space-between;gap:10px;padding:6px 12px;border-top:1px solid var(--line);font-size:14px}.br small{display:block;color:var(--muted);font-size:12.5px}.br>span:last-child{white-space:nowrap}
+.bt{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;font-size:15px}.bt.sub{font-size:14px;color:var(--muted)}.bt small{display:block;font-size:12.5px}
+@media(max-width:480px){
+#ft thead tr,#ft tbody tr{display:grid;grid-template-columns:62px 1fr 32px 32px 32px 34px 24px;align-items:center;column-gap:4px}
+#ft thead th:first-child,#ft thead th:last-child{display:none}
+#ft thead th:nth-child(2){grid-column:1}#ft thead th:nth-child(3){grid-column:2}#ft thead th:nth-child(4){grid-column:3}#ft thead th:nth-child(5){grid-column:4}#ft thead th:nth-child(6){grid-column:5}#ft thead th:nth-child(7){grid-column:6}
+#ft tbody td:nth-child(1){grid-column:1 / 7;grid-row:1}#ft tbody td:nth-child(8){grid-column:7;grid-row:1}
+#ft tbody td:nth-child(2){grid-column:1;grid-row:2}#ft tbody td:nth-child(3){grid-column:2;grid-row:2}#ft tbody td:nth-child(4){grid-column:3;grid-row:2}#ft tbody td:nth-child(5){grid-column:4;grid-row:2}#ft tbody td:nth-child(6){grid-column:5;grid-row:2}#ft tbody td:nth-child(7){grid-column:6;grid-row:2}
+#ft tbody tr{padding:6px 0;border-bottom:1px solid var(--line)}#ft td{border:0}#ft th,#ft td{width:auto!important}
+#ft input,#ft select{font-size:16px}
+}
+.br>span:first-child,.bgh>b,.rh>b,.bt>span{min-width:0;flex:1 1 auto}.br>span:last-child,.bgh>span,.rt{flex:0 0 auto;text-align:right}
 </style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -282,9 +305,10 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
     </div></details>
 
     <details id="dCost"><summary><b>Unit costs</b><span id="sCost"></span></summary><div class="body">
-      <div class="scroll"><table id="rates"><thead><tr><th>Element</th><th class="n">This lot</th><th>Low, $</th><th>High, $</th><th>Source</th></tr></thead><tbody></tbody></table></div>
-      <label class="fld" style="max-width:360px;margin-top:10px"><span>City's cost to build later, % above the developer's (sets the shortfall)</span><span class="unit"><input id="cityMarkup" type="number" min="0" step="5" placeholder="not set"><i>%</i></span></label>
-      <pre id="costLines" style="margin-top:10px"></pre>
+      <div id="rates"></div>
+      <label class="fld" style="max-width:360px;margin-top:10px"><span>City's cost to build later, % above the developer's (sets the shortfall)</span><span class="unit"><input id="cityMarkup" type="number" min="0" step="0.5" placeholder="11.5–15"><i>%</i></span></label>
+      <p class="srcp" style="font-size:13px;color:var(--muted);max-width:640px;margin:6px 0 0">Default 11.5–15%: construction management and inspection a city pays on its own projects. Low end: Lynden's 2025 Bradley Rd contract, <a href="https://mccmeetingspublic.blob.core.usgovcloudapi.net/lynden-meet-d457f2a4ca074b04b657c5c0671562f3/ITEM-Attachment-001-5b7d5cbc82c749b8992ca18d10b1bf8a.pdf" target="_blank" rel="noopener noreferrer">up to $307,182</a> on a <a href="https://www.lyndenwa.org/DocumentCenter/View/2546" target="_blank" rel="noopener noreferrer">$2,678,927 low bid</a>. High end: WSDOT's <a href="https://wsdot.wa.gov/sites/default/files/2021-11/EngineeringandContPercentageTables.pdf" target="_blank" rel="noopener noreferrer">15% construction engineering starting point</a>. Developer-built work skips this; the City's 1.5% deposit covers its review. Enter one number to override.</p>
+      <h4 class="bdh">Cost breakdown for this lot</h4><div id="costLines"></div>
       <div class="rowb" style="justify-content:flex-start"><button type="button" class="btn" id="ratesReset">Restore sourced costs</button></div>
     </div></details>
 
@@ -300,7 +324,7 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
       <div class="rowb" style="justify-content:flex-start"><button type="button" class="btn" id="loadCode">Load code</button></div>
     </div></details>
   </div>
-  <footer>Working draft. City rules and sources checked November 20, 2026. Bellingham has not supplied unit costs, so cost to build uses the average of three 2025 Whatcom County bids (Ferndale, Lynden) for bid items, plus contractor overhead (mobilization, traffic control, surveying) at the share four 2025 Whatcom County bids spent on it, design engineering (state DOT proxy), Bellingham's 1.5% administration deposit, and a 5% change-order contingency. The street light is not priced. Paving and stormwater also rest on an assumed street section, width and drainage design, labeled under Unit costs. Every rate is editable under Unit costs. Illustration for HDIP Task Force discussion by the Whatcom Housing Alliance, a housing-advocacy organization. Not a City figure or a proposed rate. Each method links to the city's code, fee schedule or official page; Brookhaven's increase and Nashville's halt are also sourced to news reports. Assumptions are labeled in each method. Legal questions go to the City Attorney.</footer>
+  <footer><p style="margin:0 0 6px">Working draft for HDIP Task Force discussion by the Whatcom Housing Alliance, a housing-advocacy organization. Not a City figure or a proposed rate.</p><details><summary>About the costs, sources and limits</summary><div style="margin-top:6px">Working draft. City rules and sources checked November 20, 2026. Bellingham has not supplied unit costs, so cost to build uses the average of three 2025 Whatcom County bids (Ferndale, Lynden) for bid items, plus contractor overhead (mobilization, traffic control, surveying) at the share four 2025 Whatcom County bids spent on it, design engineering (state DOT proxy), a performance bond, Bellingham's 1.5% administration deposit, and a 5% change-order contingency. Street trees, clearing and planter-strip restoration come from the same bids; record drawings from a 2024 Federal Way bid. Not priced: the street light and, where over about 2,000 sq ft of new hard surface, soils testing. The street light is not priced. Paving and stormwater also rest on an assumed street section, width and drainage design, labeled under Unit costs. Every rate is editable under Unit costs. Illustration for HDIP Task Force discussion by the Whatcom Housing Alliance, a housing-advocacy organization. Not a City figure or a proposed rate. Each method links to the city's code, fee schedule or official page; Brookhaven's increase and Nashville's halt are also sourced to news reports. Assumptions are labeled in each method. Legal questions go to the City Attorney.</div></details></footer>
 </div>
 <div hidden><span id="lotBrief"></span><span id="rSent"></span><span id="howT"></span><span id="dLot"></span></div>
 <script>
@@ -332,40 +356,61 @@ function tag(k){ var c=CONF[k]||CONF.placeholder; return '<span class="tag t-'+c
 
 /* ---------- unit rates for "cost to build" (Bellingham has none published) ---------- */
 var RATE_DEFAULTS = {
-  sidewalk:{label:'Sidewalk (5 ft concrete)',unit:'per ft of frontage',lo:52,hi:52,conf:'comparable',
+  sidewalk:{label:'Sidewalk (5 ft concrete)',math:"Average of 3 Whatcom bids ($91, $80, $110 per sq yd) = $93.67/sq yd. × 5 ft wide ÷ 9 = $52 per ft.",unit:'per ft of frontage',lo:52,hi:52,conf:'comparable',
     src:'Average of three 2025 Whatcom County low bids for cement concrete sidewalk: Ferndale Terrace $91/sq yd, Lynden Bradley Rd $80, Lynden 1st and Main $110 (55 sq yd). Average $93.67/sq yd, or $52/ft for a 5 ft walk. Range $44 to $61/ft. Cross-check: 2025-26 WSDOT bids ran $55 to $160/sq yd. Bid-item prices only; mobilization, traffic control, survey and design are bid separately.',
     links:[{t:'Ferndale Terrace certified bid tab (Feb 2025)',u:'https://cityofferndale.org/DocumentCenter/View/1093/250221-FT-Bid-Tab-Signed-Sealed-PDF'},{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'},{t:'Lynden 1st and Main Overlay certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2545'},{t:'WSDOT bid tab 22C517 (cross-check)',u:'https://wsdot.wa.gov/sites/default/files/2026-08/Contracts-bidtabulation-22C517.pdf'}]},
-  curbGutter:{label:'Curb and gutter',unit:'per ft of frontage',lo:47,hi:47,conf:'comparable',
+  curbGutter:{label:'Curb and gutter',math:"Average of 3 Whatcom bids ($36, $46, $59 per ft) = $47 per ft.",unit:'per ft of frontage',lo:47,hi:47,conf:'comparable',
     src:'Average of three 2025 Whatcom County low bids for cement concrete traffic curb and gutter: Ferndale Terrace $36/ft (5,460 ft), Lynden Bradley Rd $46 (2,650 ft), Lynden 1st and Main $59 (weighted, 405 ft). Average $47/ft. Range $36 to $62. Small runs cost more per foot. Cross-check: WSDOT median $52. Bid-item prices only.',
     links:[{t:'Ferndale Terrace certified bid tab (Feb 2025)',u:'https://cityofferndale.org/DocumentCenter/View/1093/250221-FT-Bid-Tab-Signed-Sealed-PDF'},{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'},{t:'Lynden 1st and Main Overlay certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2545'}]},
-  paving:{label:'Street paving to three-quarter standard',unit:'per ft of frontage',lo:88,hi:138,conf:'assumed',
-    src:'Bid prices: averages of three 2025 Whatcom County low bids. HMA Cl. 1/2 in. $124 / $122 / $150 per ton (avg $132) on jobs of 720 to 2,075 tons. A frontage job needs about 50 tons, and small quantities cost more: the Nov 2025 SR 546 Benson Rd job in Whatcom County (310 tons) bid $225 per ton. Low end uses $132; high end uses $225. Crushed surfacing top course $60 / $48 / $73 per ton (avg $60.33). Gravel base or borrow $23.50 / $17 / $21 per ton (avg $20.50). Roadway excavation incl. haul $36 / $20 / $32 per cu yd (avg $29.33). ASSUMED, not from Bellingham: a section of 3 in. asphalt over 2 in. crushed top course and 6 in. gravel base, dug 11 in. deep; 145 lb/cu ft for asphalt and 2 tons/cu yd for rock. That is about $4.89 per sq ft of new street at large-job asphalt prices, $6.58 at small-job prices. ASSUMED width: 18 to 21 ft of new pavement per foot of frontage (three-quarters of a 24 to 28 ft local street). Result $88 (18 ft, large-job price) to $138 (21 ft, small-job price) per ft. Confirm section and width against Bellingham Engineering Design Standards. Bid-item prices only.',
+  paving:{label:'Street paving to three-quarter standard',math:"Street section $6.58 per sq ft (asphalt at $225/ton, rock and digging from 3 bids). × 18–21 ft wide = $118–138 per ft.",unit:'per ft of frontage',lo:118,hi:138,conf:'assumed',
+    src:'Bid prices: averages of three 2025 Whatcom County low bids. HMA Cl. 1/2 in. $124 / $122 / $150 per ton (avg $132) on jobs of 720 to 2,075 tons. A frontage job needs about 50 tons, and small quantities cost more: the Nov 2025 SR 546 Benson Rd job in Whatcom County (310 tons) bid $225 per ton. Both ends now use the small-quantity $225, since a frontage job is closer to Benson Rd than to the large jobs. Crushed surfacing top course $60 / $48 / $73 per ton (avg $60.33). Gravel base or borrow $23.50 / $17 / $21 per ton (avg $20.50). Roadway excavation incl. haul $36 / $20 / $32 per cu yd (avg $29.33). ASSUMED, not from Bellingham: a section of 3 in. asphalt over 2 in. crushed top course and 6 in. gravel base, dug 11 in. deep; 145 lb/cu ft for asphalt and 2 tons/cu yd for rock. That is about $6.58 per sq ft of new street. ASSUMED width: 18 to 21 ft of new pavement per foot of frontage (three-quarters of a 24 to 28 ft local street). Result $118 (18 ft) to $138 (21 ft) per ft. The only remaining spread is width. Confirm section and width against Bellingham Engineering Design Standards. Bid-item prices only.',
     links:[{t:'Ferndale Terrace certified bid tab (Feb 2025)',u:'https://cityofferndale.org/DocumentCenter/View/1093/250221-FT-Bid-Tab-Signed-Sealed-PDF'},{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'},{t:'Lynden 1st and Main Overlay certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2545'},{t:'WSDOT SR 546 Benson Rd, Whatcom County, bid tab 25A011 (Nov 2025)',u:'https://wsdot.wa.gov/sites/default/files/2025-11/Contracts-bidtabulation-25A011.pdf'}]},
-  ramp:{label:'Curb ramp',unit:'each',lo:3109,hi:3109,conf:'comparable',
+  trees:{label:'Street trees (1 per 40 ft)',math:"$525 per tree (Lynden bid) ÷ 1 tree every 40 ft = $13 per ft.",unit:'per ft of frontage',lo:13,hi:13,conf:'comparable',
+    src:'Bellingham requires street trees along all right-of-way frontages at 1 per 40 ft (pre-application letter PRE2026-0058). Lynden Bradley Rd 2025 low bid: Plant Selection Street Tree $525 each (16 trees). $525 / 40 ft = $13 per ft. One bid source.',
+    links:[{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'}]},
+  clearing:{label:'Clearing and grubbing (unopened street)',math:"Lynden $43,000 ÷ 2,600 ft = $17 per ft. Ferndale $60,000 ÷ 2,500 ft = $24 per ft.",unit:'per ft of new street',lo:17,hi:24,conf:'comparable',
+    src:'Applies where the street is unpaved. 2025 Whatcom County low bids, lump sum spread over project length: Lynden Bradley Rd $43,000 over 2,600 ft = $17/ft; Ferndale Terrace $60,000 over 2,500 ft = $24/ft.',
+    links:[{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'},{t:'Ferndale Terrace certified bid tab (Feb 2025)',u:'https://cityofferndale.org/DocumentCenter/View/1093/250221-FT-Bid-Tab-Signed-Sealed-PDF'}]},
+  planter:{label:'Planter strip restoration (topsoil and seed)',math:"5 ft strip = 0.56 sq yd per ft. × $11 (topsoil) to $23.50 (topsoil + lawn) per sq yd = $6–13 per ft.",unit:'per ft of new sidewalk',lo:6,hi:13,conf:'assumed',
+    src:'2025 Whatcom County low bids: Lynden Bradley Rd Topsoil Type A $11 per sq yd; Ferndale Terrace Seeded Lawn Installation $12.50 per sq yd. ASSUMED 5 ft planter strip behind the curb wherever new sidewalk is built (Bellingham width not confirmed). Low end topsoil only ($6/ft); high end topsoil plus seeded lawn ($13/ft).',
+    links:[{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'},{t:'Ferndale Terrace certified bid tab (Feb 2025)',u:'https://cityofferndale.org/DocumentCenter/View/1093/250221-FT-Bid-Tab-Signed-Sealed-PDF'}]},
+  soils:{label:'Soils and infiltration testing',math:"No local price found; needs a geotechnical quote. Applies only at about 2,000 sq ft or more of new hard surface.",unit:'per case',lo:null,hi:null,conf:'unpriced',
+    src:'Applies only where the work adds about 2,000 sq ft or more of new hard surface, the point where the state stormwater manual requires on-site stormwater review (assumption, Ecology Stormwater Management Manual for Western Washington thresholds). The HDIP-0004 pre-application letter says on-site soils information is required to assess on-site stormwater feasibility. No sourced local price found; needs a geotechnical quote.',
+    links:[]},
+  ramp:{label:'Curb ramp',math:"Average of 3 Whatcom bids ($3,903, $2,724, $2,700) = $3,109 each.",unit:'each',lo:3109,hi:3109,conf:'comparable',
     src:'Average of three 2025 Whatcom County low bids for cement concrete curb ramps (quantity-weighted within each contract): Ferndale Terrace $3,903, Lynden Bradley Rd $2,724, Lynden 1st and Main $2,700. Average $3,109 each. Range $2,500 to $4,000. Cross-check: WSDOT median $2,600. Bid-item prices only.',
-    links:[{t:'Ferndale Terrace certified bid tab (Feb 2025)',u:'https://cityofferndale.org/DocumentCenter/View/1093/250221-FT-Bid-Tab-Signed-Sealed-PDF'},{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'},{t:'Lynden 1st and Main Overlay certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2545'}]},  light:{label:'Street light',unit:'each',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost. WSDOT bids lighting as lump-sum systems, so no per-light price can be drawn from its bid tabs.'},
-  curbExt:{label:'Curb extension at an intersection',unit:'each',lo:10000,hi:20000,conf:'consultant',
+    links:[{t:'Ferndale Terrace certified bid tab (Feb 2025)',u:'https://cityofferndale.org/DocumentCenter/View/1093/250221-FT-Bid-Tab-Signed-Sealed-PDF'},{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'},{t:'Lynden 1st and Main Overlay certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2545'}]},  light:{label:'Street light',math:"No per-light bid price found in the region (2024 or later).",unit:'each',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost. WSDOT bids lighting as lump-sum systems, so no per-light price can be drawn from its bid tabs.'},
+  curbExt:{label:'Curb extension at an intersection',math:"AVT consultant estimate for 2729 Peabody: $10,000–20,000.",unit:'each',lo:10000,hi:20000,conf:'consultant',
     src:'AVT Consulting estimate for 2729 Peabody St (HDIP-0003 intake), for the curb extension required in the second round of PFC review. Staff later agreed to remove it.'},
-  alley:{label:'Alley widening',unit:'per sq ft',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
-  storm:{label:'Stormwater for new street',unit:'per ft of new street',lo:66,hi:129,conf:'assumed',
-    src:'Bid prices: averages of 2025 Whatcom County low bids. 12 in. corrugated polyethylene storm pipe $54 (Ferndale) / $35.33 (Lynden Bradley Rd) per ft, avg $44.67. Type 1 catch basin $2,575 / $1,250 / $2,500, avg $2,108. Infiltration trench $44 (Ferndale) / $81.61 (Bradley Rd, 5 ft), avg $62.81 per ft. ASSUMED design, not from Bellingham: one foot of pipe per foot of new street plus one catch basin per 100 ft ($21/ft) = $66/ft for conveyance only; add one foot of infiltration trench per foot for on-site treatment = $129/ft. Real need depends on the site drainage report and soils. Bid-item prices only.',
+  alley:{label:'Alley widening',math:"No unit cost published.",unit:'per sq ft',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
+  storm:{label:'Stormwater for new street',math:"Catch basin $2,108 every 100 ft ($21/ft) + infiltration trench $63/ft = $84 per ft. Add 12 in. pipe $45/ft = $129 per ft.",unit:'per ft of new street',lo:84,hi:129,conf:'assumed',
+    src:'Bid prices: averages of 2025 Whatcom County low bids. 12 in. corrugated polyethylene storm pipe $54 (Ferndale) / $35.33 (Lynden Bradley Rd) per ft, avg $44.67. Type 1 catch basin $2,575 / $1,250 / $2,500, avg $2,108. Infiltration trench $44 (Ferndale) / $81.61 (Bradley Rd, 5 ft), avg $62.81 per ft. Bellingham requires all projects to infiltrate, disperse or retain runoff on site where feasible (pre-application letter PRE2026-0058, Minimum Requirement 5), so every case includes an infiltration trench. ASSUMED design: one catch basin per 100 ft ($21/ft) plus one foot of infiltration trench per foot = $84/ft; add one foot of 12 in. pipe per foot where runoff must be carried to the trench = $129/ft. Real need depends on the site drainage report and soils. Bid-item prices only.',
     links:[{t:'Ferndale Terrace certified bid tab (Feb 2025)',u:'https://cityofferndale.org/DocumentCenter/View/1093/250221-FT-Bid-Tab-Signed-Sealed-PDF'},{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'},{t:'Lynden 1st and Main Overlay certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2545'}]}
 ,
-  overhead:{label:'Contractor overhead: mobilization, traffic control, surveying',unit:'% of the priced items above',lo:21,hi:27,conf:'comparable',
-    src:'Share of each low bid spent on mobilization, traffic control and roadway surveying, from four 2025 Whatcom County jobs. Ferndale Terrace ($4.84M): mobilization 7.1%, traffic control 3.9%, surveying 1.1%. Lynden Bradley Rd (Schedule A, $2.50M): 4.0%, 10.6%, none bid. Lynden 1st and Main ($464K): 8.0%, 14.6%, none bid. WSDOT SR 546 Benson Rd ($513K): 8.8%, 16.7%, 3.3%. Low end 21% = averages of all four (7.0% + 11.5% + 2.2%). High end 27% = the two small jobs (8.4% + 15.7% + 3.3%). Cross-check: WSDOT suggests 8 to 12% mobilization for contracts under $100,000. Design engineering, the City deposit and contingency are separate lines below. No sales tax is added: work in City-owned right-of-way is public road construction (WAC 458-20-171), so tax is already inside material prices (not legal advice).',
+  swpermit:{label:'City stormwater permit fee',math:"New hard surface 300–1,000 sq ft: $132. 1,000–5,000 sq ft: $291. Over 5,000 sq ft: $1,729.",unit:'set by City tier from new hard surface',lo:0,hi:0,conf:'published',tier:true,
+    src:'Bellingham fee schedule effective 5/11/2026, Stormwater Permit Fees by new impervious area: 300 to 1,000 sq ft $132 (Level One); 1,000 to 5,000 sq ft $291 (Level Two); 5,000 sq ft to 1 acre $1,729 (Level Three). New hard surface here is estimated as new paving (18 to 21 ft wide) plus 5 ft sidewalk plus 2 ft curb and gutter. Assumption: the frontage share is counted alone; on a real project one permit covers the whole site, so the tier may be higher. The Stormwater Development Charge ($0.471 per sq ft of hard surface) is not added: it applies to private development, not new public street.',
+    links:[{t:'Bellingham Water, Sewer, Stormwater, ROW and Transportation Impact Fees (eff. 5/11/2026)',u:'https://cob.org/wp-content/uploads/water-sewer-storm-trans-fee.pdf'}]},
+  overhead:{label:'Contractor overhead: mobilization, traffic control, surveying',math:"Small Whatcom jobs: mobilization 8.4% + traffic control 15.7% + surveying 3.3% + erosion control 0.7% ≈ 28%.",unit:'% of the priced items above',lo:28,hi:28,conf:'comparable',
+    src:'Share of each low bid spent on mobilization, traffic control and roadway surveying, from four 2025 Whatcom County jobs. Ferndale Terrace ($4.84M): mobilization 7.1%, traffic control 3.9%, surveying 1.1%. Lynden Bradley Rd (Schedule A, $2.50M): 4.0%, 10.6%, none bid. Lynden 1st and Main ($464K): 8.0%, 14.6%, none bid. WSDOT SR 546 Benson Rd ($513K): 8.8%, 16.7%, 3.3%. Frontage work is a small job, so this uses the two small jobs only: 8.4% mobilization + 15.7% traffic control + 3.3% surveying = 27%, plus about 0.7% for erosion control (Ferndale 0.5%, Bradley Rd 0.7%, 1st and Main 0.8% of their bids). Rounded to 28%. The large jobs ran lower (21% average) because fixed costs spread over more work. Cross-check: WSDOT suggests 8 to 12% mobilization for contracts under $100,000. Design engineering, the City deposit and contingency are separate lines below. No sales tax is added: work in City-owned right-of-way is public road construction (WAC 458-20-171), so tax is already inside material prices (not legal advice).',
     links:[{t:'Ferndale Terrace certified bid tab (Feb 2025)',u:'https://cityofferndale.org/DocumentCenter/View/1093/250221-FT-Bid-Tab-Signed-Sealed-PDF'},{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'},{t:'Lynden 1st and Main Overlay certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2545'},{t:'WSDOT SR 546 Benson Rd, Whatcom County, bid tab 25A011 (Nov 2025)',u:'https://wsdot.wa.gov/sites/default/files/2025-11/Contracts-bidtabulation-25A011.pdf'},{t:'WSDOT EBASE mobilization guide',u:'https://appstest.wsdot.wa.gov/publications/fulltext/ProjectDev/EBASE-Estimate-and-Bid-Analysis-System.pdf'},{t:'WAC 458-20-171 (public road construction)',u:'https://dor.wa.gov/laws-rules/tax-research-index/wac-171'}]},
-  design:{label:'Design engineering by a licensed civil engineer',unit:'% of construction cost (items plus overhead)',lo:15,hi:28,conf:'assumed',
+  asbuilt:{label:'Record drawings (as-built survey)',math:"Federal Way 2024 bid: $5,000 (engineer's estimate $5,500).",unit:'per case',lo:5000,hi:5500,conf:'comparable',
+    src:'Bellingham requires record drawings for public facilities, and may take a deposit of 150% of their cost instead (Development Guidelines and Improvement Standards, March 9, 2026, section 3.8.6). Price: Federal Way Street Light Infill (March 2024), As-Built Survey and Record Drawings, low bid $5,000, engineer\'s estimate $5,500. One regional bid.',
+    links:[{t:'Bellingham Development Guidelines and Improvement Standards (Mar 2026)',u:'https://cob.org/wp-content/uploads/pw-dgi-standards-narrative-only-temp.pdf'},{t:'Federal Way Street Light Infill bid tab, RFB 24-002 (Mar 2024)',u:'https://www.federalwaywa.gov/sites/default/files/2024-03/26775%20Re-Bid%20-%20Street%20Light%20Infill%20Bid%20Tab%20-%20Final.pdf'}]},
+  design:{label:'Design engineering by a licensed civil engineer',math:"WSDOT starting point 15%. WSDOT small-project median about 28%. Check: Shoreline 2024–25, $443,010 ÷ $1,871,995 = 24%.",unit:'% of construction cost (items plus overhead)',lo:15,hi:28,conf:'assumed',
     src:'Bellingham requires frontage plans stamped by a Washington-licensed civil engineer (Development Guidelines and Improvement Standards, March 9, 2026, sections 1.1 and 2.5.1.4). No local published figure for private frontage design was found, so this uses the state DOT as a proxy. WSDOT says its design (preliminary engineering) runs about 15% of construction and uses that as a starting point. Its Exhibit 9-1 for improvement projects under $500,000 lists 15% to 39% by program type, median about 28%. Low end 15%, high end 28%. Regional check: Shoreline paid KPFF $443,010 (April 2024) to design the 8th Ave NW sidewalk project, which bid at $1,871,995 (August 2025), or about 24% of construction. A private engineer designing one frontage may differ; replace with a real proposal when one exists.',
     links:[{t:'Bellingham Development Guidelines and Improvement Standards (Mar 2026)',u:'https://cob.org/wp-content/uploads/pw-dgi-standards-narrative-only-temp.pdf'},{t:'WSDOT Cost Estimating Manual M 3034 (Exhibit 9-1)',u:'https://www.wsdot.wa.gov/publications/manuals/fulltext/m3034/estimatingguidelines.pdf'},{t:'Shoreline Council, Apr 8 2024: KPFF design contract $443,010',u:'https://shoreline.granicus.com/GeneratedAgendaViewer.php?view_id=4&clip_id=1740'},{t:'Shoreline 8th Ave NW award, Aug 2025: $1,871,995',u:'https://www.shorelinewa.gov/home/showpublisheddocument/64890/638902579135070000'}]},
-  admin:{label:'City administration deposit (Public Facilities Construction Agreement)',unit:'% of construction cost (items plus overhead)',lo:1.5,hi:1.5,conf:'published',
+  bond:{label:'Performance bond premium',math:"Surety association (NASBP): 0.5–3% one-time premium. Small contracts land near the top.",unit:'% of construction cost (items plus overhead)',lo:1.5,hi:3,conf:'assumed',
+    src:'Bellingham\'s Public Facilities Construction Agreement requires a surety bond (Development Guidelines and Improvement Standards, March 9, 2026, section 3.3); the amount is not published. National surety association NASBP: a one-time premium of 0.5% to 3% of the contract. Small contracts pay toward the top because of minimum premiums. Range 1.5% to 3%. National source; no Washington-specific rate found.',
+    links:[{t:'NASBP: What are surety bonds',u:'https://www.nasbp.org/wp-content/uploads/2024/11/NASBP_What_Are_SB_Final.pdf'},{t:'Bellingham Development Guidelines and Improvement Standards (Mar 2026)',u:'https://cob.org/wp-content/uploads/pw-dgi-standards-narrative-only-temp.pdf'}]},
+  admin:{label:'City administration deposit (Public Facilities Construction Agreement)',math:"Bellingham standard, section 3.3: 1.5% of estimated cost.",unit:'% of construction cost (items plus overhead)',lo:1.5,hi:1.5,conf:'published',
     src:'Bellingham Development Guidelines and Improvement Standards (March 9, 2026), section 3.3: the Public Facilities Construction Agreement normally requires an Administration Deposit of 1.5% of estimated cost. The stormwater permit fee and application deposit are required but no amounts are published there. The right-of-way permit itself is $20 to $75 (BMC 14.32.020), too small to show.',
     links:[{t:'Bellingham Development Guidelines and Improvement Standards (Mar 2026)',u:'https://cob.org/wp-content/uploads/pw-dgi-standards-narrative-only-temp.pdf'},{t:'BMC 14.32.020 permit fees',u:'https://bellingham.municipal.codes/BMC/14.32.020'}]},
-  contingency:{label:'Change-order contingency',unit:'% of construction cost (items plus overhead)',lo:5,hi:5,conf:'comparable',
+  contingency:{label:'Change-order contingency',math:"WSDOT: 5% typical for all projects.",unit:'% of construction cost (items plus overhead)',lo:5,hi:5,conf:'comparable',
     src:'WSDOT Cost Estimating Manual M 3034: a 5% change-order contingency is typically allowed for all projects regardless of type or size. Covers field changes during construction, not unpriced items.',
     links:[{t:'WSDOT Cost Estimating Manual M 3034',u:'https://www.wsdot.wa.gov/publications/manuals/fulltext/m3034/estimatingguidelines.pdf'}]}
 };
-var RATE_ORDER = ['sidewalk','curbGutter','paving','ramp','light','curbExt','alley','storm','overhead','design','admin','contingency'];
-var PCT_KEYS = {overhead:1,design:1,admin:1,contingency:1};
+var RATE_ORDER = ['sidewalk','curbGutter','paving','clearing','trees','ramp','light','curbExt','alley','planter','soils','storm','overhead','asbuilt','design','bond','admin','contingency','swpermit'];
+var PCT_KEYS = {overhead:1,design:1,bond:1,admin:1,contingency:1};
 
 /* ---------- pure logic ---------- */
 function reqF(s){ return s.frontages.filter(function(f){ return f.req && f.len>0; }); }
@@ -381,13 +426,22 @@ function quantities(s){
     ramp: s.ramps||0, light: s.lights||0, curbExt: s.curbExt||0,
     alley: s.alleySf||0,
     storm: sumLen(R.filter(function(f){return !f.paved;})),
-    overhead: R.length?1:0, design: R.length?1:0, admin: R.length?1:0, contingency: R.length?1:0
+    clearing: sumLen(R.filter(function(f){return !f.paved;})), trees: sumLen(R),
+    swpermit: R.length?1:0,
+    planter: sumLen(R.filter(function(f){return !f.walk;})), asbuilt: R.length?1:0,
+    soils: (sumLen(R.filter(function(f){return !f.paved;}))*18+sumLen(R.filter(function(f){return !f.walk;}))*5+sumLen(R.filter(function(f){return !f.curb;}))*2)>=2000?1:0,
+    overhead: R.length?1:0, design: R.length?1:0, bond: R.length?1:0, admin: R.length?1:0, contingency: R.length?1:0
   };
 }
 function costToBuild(s){
-  var q=quantities(s), lo=0, hi=0, bLo=0, bHi=0, items=[], unpriced=[], any=false;
+  var q=quantities(s), R0=reqF(s), lo=0, hi=0, bLo=0, bHi=0, items=[], unpriced=[], any=false;
   RATE_ORDER.forEach(function(k){
     var r=s.rates[k], n=q[k]; if(!n) return;
+    if(r.tier){ var np=sumLen(R0.filter(function(f){return !f.paved;})), nw=q.sidewalk, nc=q.curbGutter;
+      var aLo=np*18+nw*5+nc*2, aHi=np*21+nw*5+nc*2;
+      var tf=function(a){ return a<300?0:a<=1000?132:a<=5000?291:1729; };
+      var tl=tf(aLo), th=tf(aHi); if(!th) return;
+      items.push({k:k,label:r.label+' ('+Math.round(aLo).toLocaleString()+(aHi!==aLo?'–'+Math.round(aHi).toLocaleString():'')+' sq ft)',qty:1,unit:r.unit,priced:true,lo:tl,hi:th}); lo+=tl; hi+=th; any=true; return; }
     var pct=PCT_KEYS[k]; if(pct && !any) return;
     if(k==='design'){ bLo=lo; bHi=hi; }
     var baseLo=k==='overhead'?lo:bLo, baseHi=k==='overhead'?hi:bHi;
@@ -574,7 +628,7 @@ var ELIG = [
 /* ---------- UI v4: lot -> city -> reading -> all cities; adjustments folded ---------- */
 (function(){
   var $=function(id){ return document.getElementById(id); };
-  var STORE='hdip-fil-v12', state;
+  var STORE='hdip-fil-v17', state;
   var LOT={
     hdip3:['2729 Peabody St','HDIP-0003, full scope as first required','Four small lots with four ADUs. Sidewalk and one ramp on W Maryland St (curb and gutter already exist), plus the corner curb extension staff later removed.'],
     hdip4:['3605 Mill Ave','HDIP-0004, the edge case','One home on a corner lot with two unimproved streets, one of them an arterial. The builder did not proceed.'],
@@ -585,6 +639,7 @@ var ELIG = [
   function nm(c){ return SHORT[c.id]||c.name; }
   function src(k){ var c=CONF[k]||CONF.placeholder; return '<span class="src s-'+c.c+'">'+c.t+'</span>'; }
   function freshRates(){ return JSON.parse(JSON.stringify(RATE_DEFAULTS)); }
+  var CITY_CM={lo:11.5,hi:15};
   function blank(){ return {caseId:'hdip3', cityId:'pa', cityOv:{}, rates:freshRates(), width:5, casesPerYear:4, cityMarkup:null, step:'frontage', paReading:'scope', elig:{}}; }
   function loadCase(id){
     var c=CASES[id]; if(!c) return; var r=state||blank();
@@ -686,18 +741,24 @@ var ELIG = [
 
   /* unit rates */
   function renderRates(){
-    var q=quantities(state);
-    $('rates').querySelector('tbody').innerHTML=RATE_ORDER.map(function(k){
-      var r=state.rates[k], d=RATE_DEFAULTS[k], ed=(r.lo!==d.lo||r.hi!==d.hi||r.src!==d.src), qty=q[k];
-      var qtxt=!qty?'–':PCT_KEYS[k]?'all':(r.unit.indexOf('sq ft')>-1? qty.toLocaleString()+' sq ft' : r.unit.indexOf('ft')>-1? ft(qty) : qty);
-      return '<tr class="'+(qty?'on':'off')+'"><td><b>'+esc(r.label)+'</b><small>'+esc(r.unit)+'</small></td><td class="n">'+qtxt+'</td>'+
-        '<td><input type="number" id="rl_'+k+'" min="0" step="any" data-r="'+k+'" data-f="lo" value="'+(r.lo==null?'':r.lo)+'" placeholder="not set" aria-label="'+esc(r.label)+' low"></td>'+
-        '<td><input type="number" id="rh_'+k+'" min="0" step="any" data-r="'+k+'" data-f="hi" value="'+(r.hi==null?'':r.hi)+'" placeholder="not set" aria-label="'+esc(r.label)+' high"></td>'+
-        '<td>'+src(ed?'placeholder':r.conf)+(ed?' <em>edited</em>':'')+'<input type="text" id="rs_'+k+'" class="srcnote" data-r="'+k+'" data-f="src" value="'+esc(r.src)+'" aria-label="'+esc(r.label)+' source">'+(d.links?'<div class="rlinks">'+d.links.map(function(x){return '<a href="'+x.u+'" target="_blank" rel="noopener noreferrer">'+esc(x.t)+'</a>';}).join(' · ')+'</div>':'')+'</td></tr>';
+    var q=quantities(state), C=costToBuild(state), byK={};
+    C.items.forEach(function(it){ byK[it.k]=it; });
+    $('rates').innerHTML=RATE_ORDER.map(function(k){
+      var r=state.rates[k], d=RATE_DEFAULTS[k], ed=(r.lo!==d.lo||r.hi!==d.hi), qty=q[k], it=byK[k];
+      var qtxt=!qty?'not needed for this lot':PCT_KEYS[k]?'applies to the whole job':(r.unit.indexOf('sq ft')>-1? qty.toLocaleString()+' sq ft' : r.unit.indexOf('ft')>-1? ft(qty) : (r.unit==='per case'?'1 per job':qty+(r.unit==='each'?' needed':'')));
+      var tot=it?(it.priced?rK(it.lo,it.hi):'not priced'):'';
+      var inputs=d.tier?'<div class="rin"><small>Set by the City fee tier</small></div>':
+        '<div class="rin"><label>Low<input type="number" inputmode="decimal" id="rl_'+k+'" min="0" step="any" data-r="'+k+'" data-f="lo" value="'+(r.lo==null?'':r.lo)+'" placeholder="not set"></label>'+
+        '<label>High<input type="number" inputmode="decimal" id="rh_'+k+'" min="0" step="any" data-r="'+k+'" data-f="hi" value="'+(r.hi==null?'':r.hi)+'" placeholder="not set"></label><small>'+esc(r.unit)+'</small></div>';
+      return '<div class="rc '+(qty?'on':'off')+'"><div class="rh"><b>'+esc(r.label)+'</b>'+(tot?'<span class="rt">'+tot+'</span>':'')+'</div>'+
+        '<div class="rq">'+qtxt+' · '+src(ed?'placeholder':r.conf)+(ed?' <em>edited</em>':'')+'</div>'+inputs+
+        '<div class="rm"><span>Math</span>'+esc(d.math||'')+'</div>'+
+        (d.links&&d.links.length?'<div class="rlinks"><span>Sources</span>'+d.links.map(function(x){return '<a href="'+x.u+'" target="_blank" rel="noopener noreferrer">'+esc(x.t)+'</a>';}).join('')+'</div>':'')+
+        '<details class="rd"><summary>Assumptions and full note</summary><p>'+esc(d.src)+'</p></details></div>';
     }).join('');
     $('rates').querySelectorAll('[data-r]').forEach(function(el){
       el.addEventListener('input',function(){ var r=state.rates[el.getAttribute('data-r')], f=el.getAttribute('data-f');
-        if(f==='src') r.src=el.value; else { var v=parseFloat(el.value); r[f]=isNaN(v)?null:v; if(r.lo!=null&&r.hi==null) r.hi=r.lo; if(r.hi!=null&&r.lo==null) r.lo=r.hi; }
+        var v=parseFloat(el.value); r[f]=isNaN(v)?null:v; if(r.lo!=null&&r.hi==null) r.hi=r.lo; if(r.hi!=null&&r.lo==null) r.lo=r.hi;
         render(false); });
       el.addEventListener('change',renderRates);
     });
@@ -743,7 +804,7 @@ var ELIG = [
 
   function render(full){
     var s=state, c=CITY[s.cityId], C=costToBuild(s), r=runCity(s,c,C), n=s.casesPerYear||0, isB=c.id==='cob';
-    var m=s.cityMarkup, CC=(m!=null&&C.lo!=null)?{lo:C.lo*(1+m/100),hi:C.hi*(1+m/100)}:null;
+    var m=s.cityMarkup, mLo=m!=null?m:CITY_CM.lo, mHi=m!=null?m:CITY_CM.hi, CC=C.lo!=null?{lo:C.lo*(1+mLo/100),hi:C.hi*(1+mHi/100)}:null;
     var feeTxt=r.fee==null?'n/a':usdR(r.lo,r.hi), revTxt=isB?'$0':r.fee==null?'n/a':usdR(r.lo*n,r.hi*n);
     var q=quantities(s), parts=[];
     if(q.sidewalk) parts.push(ft(q.sidewalk)+' of sidewalk'); if(q.curbGutter) parts.push(ft(q.curbGutter)+' of curb and gutter'); if(q.paving) parts.push(ft(q.paving)+' of paving');
@@ -767,13 +828,22 @@ var ELIG = [
     $('rSaveS').textContent=isB?'no fee option, so nothing to save':C.lo==null?'needs a cost to build':c.conf==='cost'?'fee equals the cost, so it saves only time and bonding':sv==='None'?'the fee costs more than building':'cost to build minus the fee'+(C.partial?' (reads low: some items unpriced)':''); $('oSave').classList.toggle('dim',C.lo==null);
     var gp=CC?diffTxt(diff(r,CC),C.partial):null;
     var dC=diff(r,C); $('rGap').textContent=isB?'$0':CC?gp:dC?(dC[1]<=0?'$0':'At least '+usd(Math.max(0,dC[0]))):'Not known';
-    $('rGapS').textContent=isB?'the developer builds it all now':CC?'what the City would spend building it later, minus the fee it collected':dC?'if the City builds it for what a developer would pay; City projects usually cost more':'enter what the City would pay to build it, under Unit costs';
+    $('rGapS').textContent=isB?'the developer builds it all now':CC?'what the City would spend building it later (the developer\'s cost plus '+(m!=null?m:CITY_CM.lo+'–'+CITY_CM.hi)+'% construction management), minus the fee':dC?'if the City builds it for what a developer would pay; City projects usually cost more':'enter what the City would pay to build it, under Unit costs';
     var ref=$('rRef'); if(s.reported){ ref.hidden=false; ref.textContent='Builder-reported cost for this work: '+usd(s.reported[0])+' to '+usd(s.reported[1])+'. Unverified; not used above.'; } else ref.hidden=true;
     var miss=C.items.filter(function(it){return !it.priced;}).map(function(it){return it.label;});
     var nt=$('rNote'); if(C.partial&&!isB){ nt.hidden=false; nt.innerHTML='<b>+</b><span>Not priced: '+esc(miss.join(', '))+'. Costs read low.</span>'; } else nt.hidden=true;
     $('mHowName').textContent=nm(c);
     $('mMath').textContent=r.lines.join('\n');
-    $('costLines').textContent=C.items.length? C.items.map(function(it){ if(it.pct) return it.label+': '+s.rates[it.k].lo+(s.rates[it.k].hi!==s.rates[it.k].lo?'–'+s.rates[it.k].hi:'')+'% = '+usdR(it.lo,it.hi); return it.label+': '+(it.unit.indexOf('ft')>-1&&it.unit.indexOf('sq')<0?ft(it.qty):it.qty)+(it.priced?' x '+usdR(s.rates[it.k].lo,s.rates[it.k].hi)+' = '+usdR(it.lo,it.hi):'  (not priced)'); }).join('\n')+'\nDeveloper\'s cost, priced items: '+usdR(C.lo,C.hi)+'\nCity\'s cost to build later: '+(CC?usdR(CC.lo,CC.hi)+' (developer\'s cost + '+m+'%)':'not set') : 'No required work.';
+    var G=[['Construction',function(k){return !PCT_KEYS[k]&&k!=='asbuilt'&&k!=='swpermit';}],['Contractor overhead and record drawings',function(k){return k==='overhead'||k==='asbuilt';}],['Design, bond and contingency',function(k){return k==='design'||k==='bond'||k==='contingency';}],['City fees',function(k){return k==='admin'||k==='swpermit';}]];
+    $('costLines').innerHTML=!C.items.length?'<p class="muted">No required work.</p>':G.map(function(g){
+      var rows=C.items.filter(function(it){return g[1](it.k);}); if(!rows.length) return '';
+      var sl=0,sh=0; rows.forEach(function(it){ if(it.priced){sl+=it.lo;sh+=it.hi;} });
+      return '<div class="bg"><div class="bgh"><b>'+g[0]+'</b><span>'+rK(sl,sh)+'</span></div>'+rows.map(function(it){
+        var r=s.rates[it.k], how=!it.priced?'not priced':r.tier?'City fee tier':it.pct?(r.lo+(r.hi!==r.lo?'–'+r.hi:'')+(it.k==='overhead'?'% of construction items':'% of construction plus overhead')):((it.unit.indexOf('ft')>-1&&it.unit.indexOf('sq')<0?ft(it.qty):it.qty)+' × '+usdR(r.lo,r.hi));
+        return '<div class="br"><span>'+esc(it.label)+'<small>'+how+'</small></span><span>'+(it.priced?rK(it.lo,it.hi):'—')+'</span></div>';
+      }).join('')+'</div>';
+    }).join('')+'<div class="bt"><span>Developer\'s cost</span><b>'+usdR(C.lo,C.hi)+(C.partial?'+':'')+'</b></div>'+
+      (CC?'<div class="bt sub"><span>City\'s cost to build later<small>+'+(m!=null?m:CITY_CM.lo+'–'+CITY_CM.hi)+'% construction management</small></span><b>'+usdR(CC.lo,CC.hi)+'</b></div>':'');
     var ed=/ \(edited\)$/.test(s.caseName), B=[];
     var cf={published:['','published','published by the city'],cost:['w','cost-based','set from cost to build, so only as good as the unit costs'],unclear:['w','unclear listing','listing is ambiguous; confirm with Olympia'],invalidated:['b','not collected','legal challenge succeeded on appeal (2023); Metro stopped collecting'],baseline:['','current practice','current Bellingham practice']}[c.conf]||['w','',''];
     B.push([s.cityOv[c.id]?'w':cf[0],'Fee rule',s.cityOv[c.id]?'edited by you':cf[2],s.cityOv[c.id]?'edited':cf[1]]);
@@ -782,7 +852,7 @@ var ELIG = [
     var np=C.items.filter(function(it){return it.priced;}).length;
     var asm=C.items.some(function(it){return it.priced && s.rates[it.k].conf==='assumed';});
     B.push(C.lo==null?['b','Cost','no element priced','none priced']:C.partial?['w','Cost',np+' of '+C.items.length+' elements priced, from Whatcom County bids'+(asm?'; paving and stormwater use assumed designs':''),np+' of '+C.items.length+' priced']:['w','Cost','all elements priced from Whatcom County bids'+(asm?', with assumed paving and stormwater designs':'')+'; Bellingham has not supplied costs','Whatcom bids'+(asm?' + assumptions':'')]);
-    B.push(CC?['n','City cost','your entry, +'+m+'%','+'+m+'%']:['b','City cost','not set, so no shortfall','not set']);
+    B.push(!CC?['b','City cost','needs a cost to build','not set']:m!=null?['w','City cost','your entry: developer cost +'+m+'%','+'+m+'%']:['w','City cost','developer cost + '+CITY_CM.lo+'–'+CITY_CM.hi+'% construction management (Lynden 2025 contract; WSDOT)','+'+CITY_CM.lo+'–'+CITY_CM.hi+'% CM']);
     $('basis').innerHTML=B.map(function(x){ return '<li class="'+x[0]+'" tabindex="0" title="'+esc(x[1]+': '+x[2])+'"><b>'+x[1]+'</b> '+esc(x[3])+'</li>'; }).join('');
     $('oCost').classList.toggle('dim',C.lo==null); $('oPct').classList.toggle('dim',isB||!sh); $('oGap').classList.toggle('dim',!isB&&!CC);
     var v=verdict(); $('eligOut').className='verdict v-'+v[0]; $('eligOut').textContent=v[1]+'. '+v[2];
