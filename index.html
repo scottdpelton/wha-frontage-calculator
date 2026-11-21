@@ -283,6 +283,7 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
     </div></details>
 
     <details id="dElig"><summary><b>Pilot eligibility screen</b><span id="sElig"></span></summary><div class="body">
+      <p class="muted" style="margin:0 0 8px;font-size:13px">Draft criteria from WHA for Task Force discussion. Not City policy or code.</p>
       <div id="elig"></div>
       <div id="eligOut" class="verdict"></div>
     </div></details>
@@ -293,7 +294,7 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
       <div class="rowb" style="justify-content:flex-start"><button type="button" class="btn" id="loadCode">Load code</button></div>
     </div></details>
   </div>
-  <footer>Working draft, Nov 2026, figures unverified. Illustration for HDIP Task Force discussion by the Whatcom Housing Alliance, a housing-advocacy organization. Not a City figure or a proposed rate. Other cities' rules are from their published codes; legal questions go to the City Attorney.</footer>
+  <footer>Working draft. City rules and sources checked November 20, 2026. Bellingham has not supplied unit costs, so cost to build uses 2025-26 WSDOT bid prices (bid items only, no soft costs). Illustration for HDIP Task Force discussion by the Whatcom Housing Alliance, a housing-advocacy organization. Not a City figure or a proposed rate. Each method links to the city's code, fee schedule or official page; Brookhaven's increase and Nashville's halt are also sourced to news reports. Assumptions are labeled in each method. Legal questions go to the City Attorney.</footer>
 </div>
 <div hidden><span id="lotBrief"></span><span id="rSent"></span><span id="howT"></span><span id="dLot"></span></div>
 <script>
@@ -312,7 +313,7 @@ var CONF = {
   published:{t:'Published rate',c:'pub'},
   cost:{t:'Cost-based',c:'cost'},
   consultant:{t:'Consultant estimate',c:'mid'},
-  comparable:{t:'Comparable city',c:'mid'},
+  comparable:{t:'WSDOT bids',c:'mid'},
   placeholder:{t:'Placeholder',c:'ill'},
   unpriced:{t:'Not priced',c:'ill'},
   unclear:{t:'Listing unclear',c:'ill'},
@@ -324,13 +325,17 @@ function tag(k){ var c=CONF[k]||CONF.placeholder; return '<span class="tag t-'+c
 
 /* ---------- unit rates for "cost to build" (Bellingham has none published) ---------- */
 var RATE_DEFAULTS = {
-  sidewalk:{label:'Sidewalk (5 ft concrete)',unit:'per ft of frontage',lo:40,hi:243,conf:'comparable',
-    src:'Public-agency costs from other cities, not Bellingham. Low $40/ft: Shelton, WA 2026 fee of $8/sq ft, which the City says reflects average costs on its recent capital projects, times a 5 ft walk. High $243/ft: Nashville NDOT reported its sidewalk cost fell from $365 to $243 per ft. Costs with curb, drainage and walls run far higher (Nashville court record: $837/ft average, Jan 2020).',
-    links:[{t:'Shelton 2026 Master Fee Schedule',u:'https://cms8.revize.com/revize/sheltonwa/finance/Master%20Fee%20Schedules/2026/Resolution%20No.%201408-1025%202026%20Master%20Fee%20Schedule_20251202.pdf'},{t:'Nashville Mayor\'s commitments tracker: sidewalk construction',u:'https://www.nashville.gov/departments/mayor/commitments-tracker-neighborhoods/sidewalk-construction'}]},
-  curbGutter:{label:'Curb and gutter',unit:'per ft of frontage',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
+  sidewalk:{label:'Sidewalk (5 ft concrete)',unit:'per ft of frontage',lo:31,hi:89,conf:'comparable',
+    src:'WSDOT bid tabulations, June 2025 to Aug 2026, low (awarded) bidder: cement concrete sidewalk at $55 to $160 per sq yd across 7 contracts (median $75), or $31 to $89 per ft for a 5 ft walk. A $550/sq yd price on a 6 sq yd job was left out as unrepresentative. Bid-item prices only: mobilization, traffic control, surveying, excavation and design are bid separately and are not included. Public state-highway bids, not Bellingham costs.',
+    links:[{t:'WSDOT bid tab 24C509',u:'https://wsdot.wa.gov/sites/default/files/2026-02/Contracts-bidtabulation-24C509.pdf'},{t:'WSDOT bid tab 22C517',u:'https://wsdot.wa.gov/sites/default/files/2026-08/Contracts-bidtabulation-22C517.pdf'},{t:'WSDOT bid tab 22X309',u:'https://apps.wsdot.wa.gov/sites/default/files/2026-06/Contracts-bidtabulation-22X309.pdf'},{t:'WSDOT bid tab 26B001',u:'https://wsdot.wa.gov/sites/default/files/2026-02/Contracts-bidtabulation-26B001.pdf'},{t:'WSDOT bid tab 25Z011',u:'https://wsdot.wa.gov/sites/default/files/2026-03/Contracts-bidtabulation-25Z011.pdf'},{t:'WSDOT bid tab 25Z019',u:'https://wsdot.wa.gov/sites/default/files/2025-12/Contracts-bidtabulation-25Z019.pdf'},{t:'WSDOT bid tab 24Y014',u:'https://wsdot.wa.gov/sites/default/files/2025-06/Contracts-bidtabulation-24Y014.pdf'}]},
+  curbGutter:{label:'Curb and gutter',unit:'per ft of frontage',lo:25,hi:120,conf:'comparable',
+    src:'WSDOT bid tabulations, June 2025 to Aug 2026, low bidder: cement concrete curb and gutter at $25 to $120 per ft across 6 contracts (median $52); small quantities (under 350 ft) ran $44 to $120. Roundabout and rolled curb items excluded. Bid-item prices only, as for sidewalk.',
+    links:[{t:'WSDOT bid tab 24C509',u:'https://wsdot.wa.gov/sites/default/files/2026-02/Contracts-bidtabulation-24C509.pdf'},{t:'WSDOT bid tab 22C517',u:'https://wsdot.wa.gov/sites/default/files/2026-08/Contracts-bidtabulation-22C517.pdf'},{t:'WSDOT bid tab 22X309',u:'https://apps.wsdot.wa.gov/sites/default/files/2026-06/Contracts-bidtabulation-22X309.pdf'},{t:'WSDOT bid tab 25Z011',u:'https://wsdot.wa.gov/sites/default/files/2026-03/Contracts-bidtabulation-25Z011.pdf'},{t:'WSDOT bid tab 24Y014',u:'https://wsdot.wa.gov/sites/default/files/2025-06/Contracts-bidtabulation-24Y014.pdf'},{t:'WSDOT bid tab 26B011',u:'https://wsdot.wa.gov/sites/default/files/2026-04/Contracts-bidtabulation-26B011.pdf'}]},
   paving:{label:'Street paving to three-quarter standard',unit:'per ft of frontage',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
-  ramp:{label:'Curb ramp',unit:'each',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
-  light:{label:'Street light',unit:'each',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
+  ramp:{label:'Curb ramp',unit:'each',lo:1755,hi:4500,conf:'comparable',
+    src:'WSDOT bid tabulations, June 2025 to Aug 2026, low bidder: cement concrete curb ramps at $1,755 to $4,500 each across 5 contracts (median $2,600). Bid-item prices only.',
+    links:[{t:'WSDOT bid tab 24C509',u:'https://wsdot.wa.gov/sites/default/files/2026-02/Contracts-bidtabulation-24C509.pdf'},{t:'WSDOT bid tab 22C517',u:'https://wsdot.wa.gov/sites/default/files/2026-08/Contracts-bidtabulation-22C517.pdf'},{t:'WSDOT bid tab 22X309',u:'https://apps.wsdot.wa.gov/sites/default/files/2026-06/Contracts-bidtabulation-22X309.pdf'},{t:'WSDOT bid tab 25Z011',u:'https://wsdot.wa.gov/sites/default/files/2026-03/Contracts-bidtabulation-25Z011.pdf'},{t:'WSDOT bid tab 24Y014',u:'https://wsdot.wa.gov/sites/default/files/2025-06/Contracts-bidtabulation-24Y014.pdf'}]},
+  light:{label:'Street light',unit:'each',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost. WSDOT bids lighting as lump-sum systems, so no per-light price can be drawn from its bid tabs.'},
   curbExt:{label:'Curb extension at an intersection',unit:'each',lo:10000,hi:20000,conf:'consultant',
     src:'AVT Consulting estimate for 2729 Peabody St (HDIP-0003 intake). Staff later removed the requirement.'},
   alley:{label:'Alley widening',unit:'per sq ft',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
@@ -370,18 +375,18 @@ function tier(len, first, rest, step){ return Math.min(len,step)*first + Math.ma
 /* Each city: fn(s,P,C) -> {fee, lo, hi, lines[], notes[]} ; fee may be a range via lo/hi */
 var CITIES = [
  {id:'cob', name:'Bellingham today', place:'Build it', group:'base', conf:'baseline', asof:'Current practice',
-  how:'No fee option. The developer builds the required frontage.',
+  how:'No published fee-in-lieu option. The developer builds the required frontage to City street standards (BMC 13.04 and 13.08), or bonds for it. Variances to street standards exist (BMC 13.04.110) but are not a payment option.',
   covers:'Everything in the required scope.',
-  params:[], src:[],
+  params:[], src:[{t:'City of Bellingham: Street Frontage Improvements',u:'https://cob.org/services/transportation/street-frontage-improvements'},{t:'Bellingham Infill Toolkit: middle housing street improvements',u:'https://cob.org/gov/dept/pcd/infill-housing-toolkit'},{t:'BMC 13.04 Street Standards',u:'https://bellingham.municipal.codes/BMC/13.04'}],
   fn:function(s,P,C){ return {fee:0, lo:0, hi:0, build:true, lines:['No fee. Developer builds the scope.','Cost to build (priced items): '+usdR(C.lo,C.hi)+(C.partial?' plus unpriced items':'')]}; }},
 
  {id:'pa', name:'Port Angeles, WA', group:'wa', conf:'published', asof:'Effective April 1, 2026',
-  how:'Per foot of frontage, stepped at 50 ft. Higher tier when curb and gutter are part of the work. Plus a fee per ramp.',
-  covers:'Sidewalk, curb and gutter, ramps. Not paving, lights or stormwater.',
+  how:'Voluntary fixed fee, reviewed by Public Works. Per foot: $50 up to 50 ft and $30 beyond where no curb and gutter is involved; $100 and $60 with sidewalk, curb and gutter. Ramps $1,000 each residential, $3,000 commercial or municipal. The application says cost savings alone is not a valid reason to approve, and a project that fills a sidewalk gap may cut the charged length by 25% (not applied here). Assumption: the City page does not say whether the 50 ft step applies per street or per parcel, or whether the higher tier means curb and gutter must be built or already exists; both readings are toggles.',
+  covers:'Pedestrian safety improvements (sidewalk, curb ramps, nearby lighting) within two miles of the contributing parcel. Option 2 lets the applicant build equivalent improvements elsewhere instead.',
   params:[{k:'hiFirst',l:'With curb and gutter, first 50 ft',v:100,u:'$/ft'},{k:'hiRest',l:'With curb and gutter, beyond 50 ft',v:60,u:'$/ft'},
           {k:'loFirst',l:'Sidewalk only, first 50 ft',v:50,u:'$/ft'},{k:'loRest',l:'Sidewalk only, beyond 50 ft',v:30,u:'$/ft'},
           {k:'ramp',l:'Residential ramp',v:1000,u:'$ each'},{k:'step',l:'Step length',v:50,u:'ft'}],
-  src:[{t:'Port Angeles Sidewalk Fee in Lieu Program',u:'https://cityofpa.us/1438/Sidewalk-Fee-in-Lieu-Program'}],
+  src:[{t:'Port Angeles Sidewalk Fee in Lieu Program',u:'https://cityofpa.us/1438/Sidewalk-Fee-in-Lieu-Program'},{t:'Port Angeles fee-in-lieu application',u:'https://cityofpa.us/DocumentCenter/View/18238/Fee-in-Lieu_Application'}],
   fn:function(s,P){
     var L=[], fee=0, F=needWalk(s);
     var tierOf=function(f){ return (s.paReading==='curb' ? f.curb : !f.curb) ? 'hi':'lo'; };
@@ -403,7 +408,7 @@ var CITIES = [
   }},
 
  {id:'sequim', name:'Sequim, WA', group:'wa', conf:'cost', asof:'Ord. 2024-035; no later amendment found (code published through Dec 2024)',
-  how:'Licensed engineer\'s cost estimate, escalated by the five-year average ENR index, compounded five years forward. Spent within 5 years or refunded with interest.',
+  how:'Voluntary agreement. Cost from a Washington-licensed engineer\'s estimate, approved by the Public Works director, escalated by the average ENR index over the previous five years and compounded five years forward. The City must spend it within five years; if not spent through no fault of the developer, it is refunded with interest. Assumption: the 3% ENR rate below is a placeholder, not Sequim\'s figure.',
   covers:'Whatever the developer would have had to build.',
   params:[{k:'enr',l:'Five-year average ENR escalation (placeholder)',v:3,u:'% a year'},{k:'yrs',l:'Years projected',v:5,u:'years'}],
   src:[{t:'Sequim Municipal Code 20.30',u:'https://codepublishing.com/WA/Sequim/html/Sequim20/Sequim2030.html'}],
@@ -414,8 +419,8 @@ var CITIES = [
   }},
 
  {id:'wacost', name:'Everett and Auburn (WA)', group:'wa', conf:'cost', asof:'Current codes',
-  how:'Everett: fee equals the cost to design and install, from the applicant\'s licensed engineer (City Engineer approves) or a standard fee the City Engineer sets. Auburn: fee based on the City\'s estimated cost to complete the improvements. Renton sets its amount by fee schedule and is not modeled.',
-  covers:'The required frontage scope.',
+  how:'Everett: for a land division on an existing street, where the improvements would not transition smoothly, would not improve pedestrian safety, or could harm drainage or traffic facilities; the fee is the cost to design and install, from the applicant\'s Washington-licensed engineer (City Engineer approves) or a standard fee the City Engineer sets. Auburn: the City Engineer may grant or require a fee based on the City\'s estimated cost, including where the street is part of an identified six-year TIP project. Here both are modeled as fee = your cost to build. Renton is not modeled.',
+  covers:'The required frontage scope. Auburn: may go to the identified project or to leverage grants.',
   params:[],
   src:[{t:'Everett EMC 19.26.060',u:'https://everett.municipal.codes/EMC/19.26.060'},{t:'Auburn ACC 12.64A.050',u:'https://auburn.municipal.codes/ACC/12.64A.050'},{t:'Renton RMC 4-9-060 (amount set by City fee schedule; not modeled)',u:'https://www.codepublishing.com/WA/Renton/html/Renton04/Renton0409/Renton0409060.html'}],
   fn:function(s,P,C){ return {fee:C.lo,lo:C.lo,hi:C.hi,lines:['Fee = cost to build (priced items) = '+usdR(C.lo,C.hi)+(C.partial?' (unpriced items missing)':'')]}; }},
@@ -428,7 +433,7 @@ var CITIES = [
   fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x $'+P.rate+'/ft = '+usd(v)]}; }},
 
  {id:'shelton', name:'Shelton, WA', group:'wa', conf:'published', asof:'2026 master fee schedule, effective Jan 1, 2026',
-  how:'Unit fees in lieu of right-of-way work, set from average costs on recent City capital projects: $8.00 per sq ft of sidewalk and $25.00 per ft of curb and gutter. Separate per-sq-ft fees for chip seal, asphalt and base rock are not modeled here. The 2024 code change (Ord. 2020-0224) moved the base fee into the master fee schedule; the old $0/ft base no longer applies.',
+  how:'Unit fees in lieu of right-of-way work, set from average costs on recent City capital projects: $8.00 per sq ft of sidewalk and $25.00 per ft of curb and gutter. Separate per-sq-ft fees for chip seal, asphalt and base rock are not modeled here. The schedule is a scanned PDF; the $25 curb figure is read from a poor scan, so confirm against the clean resolution. The 2024 code change (Ord. 2020-0224) moved the base fee into the master fee schedule; the old $0/ft base no longer applies.',
   covers:'Sidewalk and curb and gutter. Paving fees exist but are not modeled.',
   params:[{k:'walk',l:'Sidewalk',v:8,u:'$/sq ft'},{k:'cg',l:'Curb and gutter',v:25,u:'$/ft'}],
   src:[{t:'Shelton 2026 Master Fee Schedule, Res. 1408-1025 (scanned PDF)',u:'https://cms8.revize.com/revize/sheltonwa/finance/Master%20Fee%20Schedules/2026/Resolution%20No.%201408-1025%202026%20Master%20Fee%20Schedule_20251202.pdf'},{t:'Shelton Municipal Code 12.36',u:'https://www.codepublishing.com/WA/Shelton/html/Shelton12/Shelton1236.html'}],
@@ -436,7 +441,7 @@ var CITIES = [
     return {fee:v,lo:v,hi:v,lines:[ft(W)+' x '+s.width+' ft = '+Math.round(a).toLocaleString()+' sq ft sidewalk x $'+P.walk+' = '+usd(vw),ft(C)+' without curb x $'+P.cg+'/ft curb and gutter = '+usd(vc)]}; }},
 
  {id:'puy', name:'Puyallup, WA', group:'wa', conf:'published', asof:'Fee schedule dated Jan 16, 2026; CCI-adjusted yearly',
-  how:'Per foot of required frontage for residential infill lots and commercial tenant improvements: $243.15/ft where there is no concrete curb, $121.57/ft where curb exists. Capped at 15% of project valuation. Subdivisions and new commercial pay actual cost instead.',
+  how:'Per foot of required frontage for residential infill lots and commercial tenant improvements: $243.15/ft where there is no concrete curb, $121.57/ft where curb exists. Capped at 15% of project valuation. Subdivisions and new commercial pay the cost of installing the improvements instead. Assumption: this applies the infill rate; a short plat (like 2729 Peabody) may count as a subdivision in Puyallup and pay actual cost. The fee schedule says rates are revised yearly by the Construction Cost Index.',
   covers:'Required frontage improvements (PMC 11.08.135).',
   params:[{k:'noCurb',l:'No existing curb',v:243.15,u:'$/ft'},{k:'curb',l:'Existing curb',v:121.57,u:'$/ft'},{k:'capPct',l:'Cap, share of project valuation',v:15,u:'%'}],
   src:[{t:'Puyallup Development Engineering Fee Schedule (01/16/26)',u:'https://puyallupwa.gov/DocumentCenter/View/15231/CoP-Development-Engineering-Fee-Schedule-011626'}],
@@ -447,9 +452,9 @@ var CITIES = [
     return {fee:v,lo:v,hi:v,lines:lines}; }},
 
  {id:'pdx', name:'Portland, OR (LTIC)', group:'us', conf:'published', asof:'$796/ft from July 1, 2026',
-  how:'Per foot of frontage on local streets without a curb, in single-dwelling zones. Arterials and curbed streets are not charged. ADUs and affordable housing are exempt, with other exemptions. $750/ft applied through June 30, 2026.',
-  covers:'Pooled for local street projects.',
-  params:[{k:'rate',l:'Charge',v:796,u:'$/ft'},{k:'cap',l:'Cap on charged frontage (0 = none)',v:0,u:'ft'}],
+  how:'Per foot of frontage on a local service street without a curb, in single-dwelling zones. Arterials and curbed streets are not charged. Charged frontage is capped by zone: R2.5 none, R5 50 ft, R7 70 ft, R10 100 ft, R20 and RF 120 ft (set the cap below). Exempt: ADUs, affordable housing, low-income owner-occupants, disaster replacement, and others. $750/ft applied through June 30, 2026.',
+  covers:'Partly funds local street projects, focused on Cully, Division-Midway and Tryon-Stephens Headwaters.',
+  params:[{k:'rate',l:'Charge',v:796,u:'$/ft'},{k:'cap',l:'Cap on charged frontage by zone (0 = none, as R2.5)',v:0,u:'ft'}],
   src:[{t:'Portland LTIC',u:'https://www.portland.gov/transportation/permitting/ltic'},{t:'Portland TRN-3.450 fee schedule',u:'https://www.portland.gov/transportation/documents/trn-3450-exhibit-c-fees-rates-and-charges-transportation-development-0/download'}],
   fn:function(s,P){
     var F=reqF(s).filter(function(f){return f.cls==='local' && !f.curb;}), L=sumLen(F), c=P.cap>0?Math.min(L,P.cap):L, v=c*P.rate;
@@ -460,36 +465,36 @@ var CITIES = [
   }},
 
  {id:'tampa', name:'Tampa, FL', group:'us', conf:'published', asof:'Instructions dated July 2026',
-  how:'Per foot of frontage where sidewalk is required but "not practical" (grand tree, drainage ditch, unique circumstances, or an unsidewalked residential neighborhood).',
-  covers:'Sidewalk trust fund.',
+  how:'Per linear foot of street frontage where a sidewalk is required but found "not practical": a grand tree, a drainage ditch or utility that cannot be relocated, other unique circumstances, or a residential neighborhood meeting listed criteria such as no existing sidewalks (Tampa Code 22-103).',
+  covers:'City of Tampa Sidewalk In-Lieu Fee Trust Fund.',
   params:[{k:'rate',l:'Charge',v:220,u:'$/ft'}],
   src:[{t:'Tampa Sidewalk In-Lieu Fee application',u:'https://www.tampa.gov/sites/default/files/document/2026/sidewalk-in-lieu-form-updated-07-13-2026-rev10.26.26_ada.pdf'}],
   fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x $'+P.rate+'/ft = '+usd(v)]}; }},
 
  {id:'hou', name:'Houston, TX', group:'us', conf:'published', asof:'$12/sq ft in City fee schedule effective Jan 1, 2026',
-  how:'Per square foot of the sidewalk that would have been required. The City Engineer sets the rate from the material and labor cost of City-built sidewalks. Automatic eligibility is narrow (new single-family on a local street, not a corner lot, no sidewalk within 500 ft, and others).',
-  covers:'Sidewalk only. Houston does not state a sidewalk width; the width here is your input.',
+  how:'Per square foot of the sidewalk that would have been required. The City Engineer set the rate from material and labor costs of City-built sidewalks; the page says it reflects 2022 costs. Automatic eligibility is narrow: new single-family, not on a lot platted after Oct 1, 2020, on a local street, not a corner lot, 20% or less of the blockface, no sidewalk within 500 ft, no school on the block. Other lots apply to a Sidewalk Committee. 2729 Peabody (a corner lot, newly platted) would not qualify automatically.',
+  covers:'Sidewalk only. Assumption: Houston does not state a width; 5 ft is used here.',
   params:[{k:'rate',l:'Charge',v:12,u:'$/sq ft'}],
   src:[{t:'Houston Fee in Lieu of Sidewalk Construction',u:'https://houstontx.gov/planning/sidewalk-fee-in-lieu.html'},{t:'Houston City-Wide Fee Schedule (search "sidewalk")',u:'https://cohweb.houstontx.gov/FIN_FeeSchedule/default.aspx'}],
   fn:function(s,P){ var L=sumLen(needWalk(s)), a=L*s.width, v=a*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x '+s.width+' ft wide = '+Math.round(a).toLocaleString()+' sq ft x $'+P.rate+' = '+usd(v)]}; }},
 
  {id:'atx', name:'Austin, TX', group:'us', conf:'published', asof:'Rates on City land development page; guide revised Mar 2026',
-  how:'Per square foot of sidewalk, by use: residential, multifamily, commercial.',
-  covers:'Sidewalk, spent under the Sidewalk Plan.',
+  how:'Per square foot of sidewalk, by actual land use: $7.50 single family, $18 multifamily, $24 commercial. Austin\'s method: lot width minus driveway width at the property line, times 5 ft (its required width since June 2022), times the rate. Approved by the director where a sidewalk is impractical. Assumption: no street-side driveways are deducted here.',
+  covers:'Collected by Austin Transportation and Public Works; the City page does not say how it is spent.',
   params:[{k:'res',l:'Residential',v:7.5,u:'$/sq ft'},{k:'mf',l:'Multifamily',v:18,u:'$/sq ft'},{k:'com',l:'Commercial',v:24,u:'$/sq ft'}],
   src:[{t:'Austin Land Development Engineering (states the $7.50 / $18 / $24 rates)',u:'https://www.austintexas.gov/transportation-public-works/divisions/land-development-engineering'},{t:'Austin: what to know about sidewalk requirements (Oct 2026)',u:'https://www.austintexas.gov/development-services/building-connections/what-know-about-sidewalk-requirements-your-building'}],
   fn:function(s,P){ var r=P[s.use]||P.res, L=sumLen(needWalk(s)), a=L*s.width, v=a*r; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x '+s.width+' ft = '+Math.round(a).toLocaleString()+' sq ft x $'+r+' ('+({res:'residential',mf:'multifamily',com:'commercial'})[s.use]+') = '+usd(v)]}; }},
 
  {id:'brook', name:'Brookhaven, GA', group:'us', conf:'published', asof:'Council increase adopted Jan 27, 2026; reviewed annually',
   how:'Flat payment per linear foot into the sidewalk fund where a sidewalk is required. Raised from $50 (set 2018) to $77 in January 2026. The City says the $77 assumes a 7.5 ft average width and includes an installation multiplier. The amendment requires annual review against the prior year\'s City sidewalk costs.',
-  covers:'Sidewalk fund.',
+  covers:'City infill sidewalk funds.',
   params:[{k:'rate',l:'Charge',v:77,u:'$/ft'}],
   src:[{t:'Rough Draft Atlanta, Mar 2026 (quotes the City release: $50 to $77, adopted Jan 27)',u:'https://roughdraftatlanta.com/2026/03/29/brookhaven-sidewalk-project-executive-park/'},{t:'City of Brookhaven news flash (the $77 rate and 7.5 ft assumption)',u:'https://www.brookhavenga.gov/m/newsflash/home/detail/78'}],
   fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate; return {fee:v,lo:v,hi:v,lines:[ft(L)+' x $'+P.rate+'/ft = '+usd(v)]}; }},
 
  {id:'nash', name:'Nashville, TN', group:'caution', conf:'invalidated', asof:'Not collected since the May 2023 ruling',
-  how:'Per foot, set each July 1 from, but reduced below, Metro\'s three-year average sidewalk cost ($186/ft in 2020-21; Metro\'s actual cost averaged $837/ft in Jan 2020), capped at 3% of construction value. In Knight v. Metro (6th Cir. May 10, 2023) the court held that Nollan/Dolan applies to legislated sidewalk conditions, reversed the district court, and remanded; Metro had not defended the ordinance under that test. Metro then stopped collecting in-lieu fees. Shown as a caution, not a rate to copy.',
-  covers:'Pedestrian benefit fund.',
+  how:'Per foot, set each July 1 from, but reduced below, Metro\'s three-year average sidewalk cost ($186/ft in 2020-21; Metro\'s actual cost averaged $837/ft in Jan 2020), capped at 3% of construction value. In Knight v. Metro (6th Cir. May 10, 2023) the court held that Nollan/Dolan applies to legislated sidewalk conditions, reversed the district court, and remanded; Metro had not defended the ordinance under that test. After the ruling, Metro stopped collecting the fee, per Walk Bike Nashville in the Nashville Banner. Shown as a caution, not a rate to copy.',
+  covers:'Metro\'s pedestrian benefit fund.',
   params:[{k:'rate',l:'Charge (2020-21)',v:186,u:'$/ft'},{k:'capPct',l:'Cap, share of construction value',v:3,u:'%'}],
   src:[{t:'Knight v. Metro, Sixth Circuit opinion (May 10, 2023)',u:'https://www.opn.ca6.uscourts.gov/opinions.pdf/23a0098p-06.pdf'},{t:'Knight v. Metro, district court opinion (source of $186 and 3%; reversed on appeal)',u:'https://www.govinfo.gov/content/pkg/USCOURTS-tnmd-3_20-cv-00922/pdf/USCOURTS-tnmd-3_20-cv-00922-0.pdf'},{t:'Nashville Banner, July 2023 (Metro stopped collecting the fee)',u:'https://nashvillebanner.com/2023/07/10/at-issue-sidewalks/'},{t:'Infinium Builders v. Metro (M.D. Tenn. Aug 2025), third-party case summary',u:'https://app.midpage.ai/case/infinium-builders-llc-v-metropolitan-11117294'}],
   fn:function(s,P){ var L=sumLen(needWalk(s)), v=L*P.rate, lines=[ft(L)+' x $'+P.rate+'/ft = '+usd(v)];
@@ -512,16 +517,16 @@ function runCity(s,c,C){ C=C||costToBuild(s); var r=c.fn(s,cityParams(s,c),C); r
 function F(name,len,cls,paved,curb,walk,req){ return {name:name,len:len,cls:cls,paved:paved,curb:curb,walk:walk,req:req}; }
 var CASES = {
   hdip3:{label:'HDIP-0003: 2729 Peabody St (documented scope)', hypo:false,
-    note:'Sources: pre-application letter PRE2024-0067, the Final Decision, plan set PFC2025-0030, and the AVT intake. 10,000 sq ft lot, short plat into 4 small lots with 4 ADUs. Existing conditions per the Final Decision (findings 10 and 29): W Maryland St has curb and gutter on the project (south) side, with curb, gutter and sidewalk on the north side; Peabody St is a minimum-standard street with gravel shoulders and sidewalk on each side, no curb. Required: a 5 ft setback sidewalk on the south side of W Maryland St, street trees on both streets, and one ramp. Alley widening to 15 ft is also required; its area is not in the file, so enter it if known. The late curb extension (AVT estimate $10,000 to $20,000) was removed by staff; set it to 1 to see its effect. No engineer\'s estimate is in the file.',
+    note:'Sources: pre-application letter PRE2024-0067, the Final Decision, plan set PFC2025-0030, and the AVT intake. 10,000 sq ft lot (about 100 ft on each street, per the plan set), short plat into 4 small lots with 4 ADUs. Existing conditions per the Final Decision (findings 10 and 29): W Maryland St has curb and gutter on the project (south) side, with curb, gutter and sidewalk on the north side; Peabody St is a minimum-standard street with gravel shoulders and sidewalk on each side, no curb. Required: a 5 ft setback sidewalk on the south side of W Maryland St, street trees on both streets, and one ramp. Alley widening to 15 ft is also required; its area is not in the file, so enter it if known. The late curb extension (AVT estimate $10,000 to $20,000) was removed by staff; set it to 1 to see its effect. No engineer\'s estimate is in the file.',
     frontages:[F('W Maryland St (curb and gutter exist)',100,'local',true,true,false,true),F('Peabody St (gravel shoulder, sidewalk)',100,'local',true,false,true,false)],
     ramps:1, lights:0, curbExt:0, alleySf:0, use:'res', units:8, constrValue:0, elig:{connects:true}},
   hdip4:{label:'HDIP-0004: 3605 Mill Ave (edge case, cost unverified)', hypo:false,
-    note:'Sources: pre-application letter PRE2026-0058 and the October 28 case brief. Frontage lengths are City GIS parcel edges. 36th St and Samish Way are unimproved: no paving, curb, gutter or sidewalk. Samish Way also needs a street light. The builder reported $500,000 to $1,000,000 for the work; that figure is unverified and is shown for reference only, not used in any rate.',
-    frontages:[F('36th St',149.48,'local',false,false,false,true),F('Samish Way',154.17,'arterial',false,false,false,true),F('Mill Ave (improved)',24.81,'local',true,true,true,false)],
+    note:'Sources: pre-application letter PRE2026-0058 and the October 28 case brief. Frontage lengths are City GIS parcel edges (not surveyed). Per the letter, 36th St has no pavement, curb, gutter or sidewalk; Samish Way (an arterial, pavement score 79) lacks curb, gutter and sidewalk. Both need three-quarter-standard improvements, and Samish Way needs one street light. One ramp is assumed from the PW note to show the Mill Ave ADA ramp. The builder reported $500,000 to $1,000,000 for the work; that figure is unverified and is shown for reference only, not used in any rate.',
+    frontages:[F('36th St',149.48,'local',false,false,false,true),F('Samish Way',154.17,'arterial',true,false,false,true),F('Mill Ave (improved)',24.81,'local',true,true,true,false)],
     ramps:1, lights:1, curbExt:0, alleySf:0, use:'res', units:1, constrValue:0, reported:[500000,1000000], elig:{}},
   hdip4b:{label:'HDIP-0004 if Samish Way is dropped', hypo:false,
     note:'As HDIP-0004, with Samish Way not required, per the November 17 Task Force discussion (staff to confirm in writing). Builder-reported cost covered both streets.',
-    frontages:[F('36th St',149.48,'local',false,false,false,true),F('Samish Way (not required)',154.17,'arterial',false,false,false,false),F('Mill Ave (improved)',24.81,'local',true,true,true,false)],
+    frontages:[F('36th St',149.48,'local',false,false,false,true),F('Samish Way (not required)',154.17,'arterial',true,false,false,false),F('Mill Ave (improved)',24.81,'local',true,true,true,false)],
     ramps:1, lights:0, curbExt:0, alleySf:0, use:'res', units:1, constrValue:0, reported:[500000,1000000], elig:{}},
   custom:{label:'Your own lot', hypo:true,
     note:'Enter your own frontages. Tick what already exists on each street; the required work and every city\'s fee follow from that.',
@@ -541,7 +546,7 @@ var ELIG = [
 /* ---------- UI v4: lot -> city -> reading -> all cities; adjustments folded ---------- */
 (function(){
   var $=function(id){ return document.getElementById(id); };
-  var STORE='hdip-fil-v5', state;
+  var STORE='hdip-fil-v6', state;
   var LOT={
     hdip3:['2729 Peabody St','HDIP-0003, documented scope','Four small lots with four ADUs. Staff required a sidewalk and one ramp on W Maryland St, where curb and gutter already exist.'],
     hdip4:['3605 Mill Ave','HDIP-0004, the edge case','One home on a corner lot with two unimproved streets, one of them an arterial. The builder did not proceed.'],
@@ -630,7 +635,7 @@ var ELIG = [
   }
   function verdict(){
     var pos=ELIG.some(function(e){return e.pos&&state.elig[e.k];}), neg=ELIG.some(function(e){return !e.pos&&state.elig[e.k];});
-    if(neg) return ['no','Would not qualify','An exclusion applies, so the frontage gets built and no fee is offered.'];
+    if(neg) return ['no','Would not qualify (draft criteria)','An exclusion applies, so the frontage gets built and no fee is offered.'];
     if(pos) return ['yes','Could qualify','Subject to written staff findings.'];
     return ['unk','Not screened yet','Tick what staff have confirmed.'];
   }
@@ -747,7 +752,7 @@ var ELIG = [
     B.push(s.origin==='docs'?[ed?'w':'','Lengths',ed?'City documents, then edited':'City documents and parcel map',ed?'edited':'City docs']:s.origin==='maps'?[ed?'w':'','Lengths',ed?'City parcel map, then edited':'City parcel map',ed?'edited':'parcel map']:['n','Lengths','entered by you','your entry']);
     B.push(s.origin==='docs'?[ed?'w':'','Scope',ed?'curb, sidewalk, ramps from the pre-application letter, then edited':'curb, sidewalk, ramps from the pre-application letter',ed?'edited':'pre-app letter']:s.origin==='maps'?['w','Scope','sidewalk from City map; curb and ramps are guesses','partly guessed']:['n','Scope','entered by you','your entry']);
     var np=C.items.filter(function(it){return it.priced;}).length;
-    B.push(C.lo==null?['b','Cost','no element priced','none priced']:C.partial?['w','Cost',np+' of '+C.items.length+' elements priced, from other cities',np+' of '+C.items.length+' priced']:['w','Cost','all elements priced from other cities; check sources','other cities']);
+    B.push(C.lo==null?['b','Cost','no element priced','none priced']:C.partial?['w','Cost',np+' of '+C.items.length+' elements priced, from WSDOT bids',np+' of '+C.items.length+' priced']:['w','Cost','all elements priced from WSDOT bids and a consultant estimate; Bellingham has not supplied costs','WSDOT bids']);
     B.push(CC?['n','City cost','your entry, +'+m+'%','+'+m+'%']:['b','City cost','not set, so no shortfall','not set']);
     $('basis').innerHTML=B.map(function(x){ return '<li class="'+x[0]+'" tabindex="0" title="'+esc(x[1]+': '+x[2])+'"><b>'+x[1]+'</b> '+esc(x[3])+'</li>'; }).join('');
     $('oCost').classList.toggle('dim',C.lo==null); $('oPct').classList.toggle('dim',isB||!sh); $('oGap').classList.toggle('dim',!isB&&!CC);
