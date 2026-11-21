@@ -234,6 +234,7 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
 .cbtn.on{border-color:var(--acc);box-shadow:none}
 }
 #caseNote{white-space:pre-line;line-height:1.5}
+.gml{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:8px;font-size:14px}.gml span{color:var(--muted);font-size:13px;width:100%}.gml a{display:inline-block;padding:7px 12px;border:1.5px solid var(--acc);border-radius:999px;text-decoration:none;color:inherit;font-weight:600}
 </style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -253,8 +254,9 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
         <input id="addr" type="text" placeholder="Address or parcel number, e.g. 3605 Mill Ave" autocomplete="off" spellcheck="false">
         <div id="addrList"></div><p class="muted" id="addrMsg" role="status"></p>
         <div class="mapwrap"><div id="map"></div><button type="button" class="btn mapmove" id="mapMove" hidden>Move map</button></div>
+        <div id="gmLinks" class="gml" hidden><span>Check curb and current conditions:</span><a id="gmSV" target="_blank" rel="noopener noreferrer">Street View ↗</a><a id="gmMap" target="_blank" rel="noopener noreferrer">Google Maps ↗</a></div>
         <p class="muted mapmsg" id="mapMsg" role="status"></p>
-        <div id="mapKey" class="mapkey"><span><i style="background:#ff7a1a"></i>Parcel</span><span><i style="background:#22c55e"></i>Sidewalk</span><span><i style="background:#ffcc00"></i>Incomplete</span><span><i class="dash"></i>Street center</span><span><i class="dot" style="background:#22c55e"></i>Ramp</span><span><i class="dot" style="background:#ef4444"></i>Ramp, no domes</span></div>
+        <div id="mapKey" class="mapkey"><span><i style="background:#ff7a1a"></i>Parcel</span><span><i style="background:#22c55e"></i>Sidewalk</span><span><i style="background:#ffcc00"></i>Incomplete</span><span><i class="dash"></i>Street center</span><span><b style="color:#22c55e;font-size:12px;line-height:1;margin-right:4px;vertical-align:1px">●</b>Ramp</span><span><b style="color:#ef4444;font-size:12px;line-height:1;margin-right:4px;vertical-align:1px">●</b>Ramp, no domes</span></div>
       </div>
       <h2 style="margin-top:14px">or use a documented case</h2>
       <div class="lots" id="lotBtns"></div>
@@ -667,13 +669,17 @@ var MAP=(function(){
   function show(addr,onPick){
     return load().then(function(){
       init(onPick); grp.clearLayers();
-      if(!addr){ m.setView([48.7519,-122.4787],13); MAP.msg('Tap any parcel to load it into the calculator.'); return; }
+      if(!addr){ document.getElementById('gmLinks').hidden=true; m.setView([48.7519,-122.4787],13); MAP.msg('Tap any parcel to load it into the calculator.'); return; }
       MAP.msg('Loading City map layers…');
       var wh=addr.indexOf('PC:')===0?"PARCEL_CODE='"+addr.slice(3)+"'":"Site_Address='"+addr.replace(/'/g,"''")+"'";
       return q('ReportLayers/MapServer/2',{where:wh,outFields:'Site_Address',returnGeometry:'true'}).then(function(j){
         if(!j.features||!j.features.length){ MAP.msg('This lot is not on the City parcel map.'); return; }
         var par=L.geoJSON(j,{style:{color:'#ff7a1a',weight:3,fillOpacity:0.12}}).addTo(grp), bb=par.getBounds(), big=bb.pad(1.2);
         m.fitBounds(bb.pad(0.9),{maxZoom:19});
+        var c=bb.getCenter(), sv=document.getElementById('gmSV'), gm=document.getElementById('gmMap');
+        sv.href='https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+c.lat.toFixed(6)+','+c.lng.toFixed(6);
+        gm.href='https://www.google.com/maps/search/?api=1&query='+c.lat.toFixed(6)+','+c.lng.toFixed(6);
+        document.getElementById('gmLinks').hidden=false;
         var env=[big.getWest(),big.getSouth(),big.getEast(),big.getNorth()].join(','), g={geometry:env,geometryType:'esriGeometryEnvelope',inSR:4326,spatialRel:'esriSpatialRelIntersects',returnGeometry:'true'};
         return Promise.all([
           q('Grp_Transportation/MapServer/34',Object.assign({where:'1=1',outFields:'Name,ST_Class'},g)).then(function(s){ L.geoJSON(s,{style:{color:'#ffffff',weight:2,dashArray:'6 6',opacity:0.9},onEachFeature:function(f,l){ if(f.properties.Name) l.bindTooltip(f.properties.Name+(f.properties.ST_Class?' · '+f.properties.ST_Class:''),{sticky:true}); }}).addTo(grp); }),
