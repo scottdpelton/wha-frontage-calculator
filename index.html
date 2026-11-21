@@ -294,7 +294,7 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
       <div class="rowb" style="justify-content:flex-start"><button type="button" class="btn" id="loadCode">Load code</button></div>
     </div></details>
   </div>
-  <footer>Working draft. City rules and sources checked November 20, 2026. Bellingham has not supplied unit costs, so cost to build uses 2025-26 WSDOT bid prices (bid items only, no soft costs). Illustration for HDIP Task Force discussion by the Whatcom Housing Alliance, a housing-advocacy organization. Not a City figure or a proposed rate. Each method links to the city's code, fee schedule or official page; Brookhaven's increase and Nashville's halt are also sourced to news reports. Assumptions are labeled in each method. Legal questions go to the City Attorney.</footer>
+  <footer>Working draft. City rules and sources checked November 20, 2026. Bellingham has not supplied unit costs, so cost to build uses the average of three 2025 Whatcom County bids (Ferndale, Lynden), bid items only, no soft costs. Every rate is editable under Unit costs. Illustration for HDIP Task Force discussion by the Whatcom Housing Alliance, a housing-advocacy organization. Not a City figure or a proposed rate. Each method links to the city's code, fee schedule or official page; Brookhaven's increase and Nashville's halt are also sourced to news reports. Assumptions are labeled in each method. Legal questions go to the City Attorney.</footer>
 </div>
 <div hidden><span id="lotBrief"></span><span id="rSent"></span><span id="howT"></span><span id="dLot"></span></div>
 <script>
@@ -313,7 +313,7 @@ var CONF = {
   published:{t:'Published rate',c:'pub'},
   cost:{t:'Cost-based',c:'cost'},
   consultant:{t:'Consultant estimate',c:'mid'},
-  comparable:{t:'WSDOT bids',c:'mid'},
+  comparable:{t:'Whatcom bids',c:'mid'},
   placeholder:{t:'Placeholder',c:'ill'},
   unpriced:{t:'Not priced',c:'ill'},
   unclear:{t:'Listing unclear',c:'ill'},
@@ -325,19 +325,18 @@ function tag(k){ var c=CONF[k]||CONF.placeholder; return '<span class="tag t-'+c
 
 /* ---------- unit rates for "cost to build" (Bellingham has none published) ---------- */
 var RATE_DEFAULTS = {
-  sidewalk:{label:'Sidewalk (5 ft concrete)',unit:'per ft of frontage',lo:31,hi:89,conf:'comparable',
-    src:'WSDOT bid tabulations, June 2025 to Aug 2026, low (awarded) bidder: cement concrete sidewalk at $55 to $160 per sq yd across 7 contracts (median $75), or $31 to $89 per ft for a 5 ft walk. A $550/sq yd price on a 6 sq yd job was left out as unrepresentative. Bid-item prices only: mobilization, traffic control, surveying, excavation and design are bid separately and are not included. Public state-highway bids, not Bellingham costs.',
-    links:[{t:'WSDOT bid tab 24C509',u:'https://wsdot.wa.gov/sites/default/files/2026-02/Contracts-bidtabulation-24C509.pdf'},{t:'WSDOT bid tab 22C517',u:'https://wsdot.wa.gov/sites/default/files/2026-08/Contracts-bidtabulation-22C517.pdf'},{t:'WSDOT bid tab 22X309',u:'https://apps.wsdot.wa.gov/sites/default/files/2026-06/Contracts-bidtabulation-22X309.pdf'},{t:'WSDOT bid tab 26B001',u:'https://wsdot.wa.gov/sites/default/files/2026-02/Contracts-bidtabulation-26B001.pdf'},{t:'WSDOT bid tab 25Z011',u:'https://wsdot.wa.gov/sites/default/files/2026-03/Contracts-bidtabulation-25Z011.pdf'},{t:'WSDOT bid tab 25Z019',u:'https://wsdot.wa.gov/sites/default/files/2025-12/Contracts-bidtabulation-25Z019.pdf'},{t:'WSDOT bid tab 24Y014',u:'https://wsdot.wa.gov/sites/default/files/2025-06/Contracts-bidtabulation-24Y014.pdf'}]},
-  curbGutter:{label:'Curb and gutter',unit:'per ft of frontage',lo:25,hi:120,conf:'comparable',
-    src:'WSDOT bid tabulations, June 2025 to Aug 2026, low bidder: cement concrete curb and gutter at $25 to $120 per ft across 6 contracts (median $52); small quantities (under 350 ft) ran $44 to $120. Roundabout and rolled curb items excluded. Bid-item prices only, as for sidewalk.',
-    links:[{t:'WSDOT bid tab 24C509',u:'https://wsdot.wa.gov/sites/default/files/2026-02/Contracts-bidtabulation-24C509.pdf'},{t:'WSDOT bid tab 22C517',u:'https://wsdot.wa.gov/sites/default/files/2026-08/Contracts-bidtabulation-22C517.pdf'},{t:'WSDOT bid tab 22X309',u:'https://apps.wsdot.wa.gov/sites/default/files/2026-06/Contracts-bidtabulation-22X309.pdf'},{t:'WSDOT bid tab 25Z011',u:'https://wsdot.wa.gov/sites/default/files/2026-03/Contracts-bidtabulation-25Z011.pdf'},{t:'WSDOT bid tab 24Y014',u:'https://wsdot.wa.gov/sites/default/files/2025-06/Contracts-bidtabulation-24Y014.pdf'},{t:'WSDOT bid tab 26B011',u:'https://wsdot.wa.gov/sites/default/files/2026-04/Contracts-bidtabulation-26B011.pdf'}]},
+  sidewalk:{label:'Sidewalk (5 ft concrete)',unit:'per ft of frontage',lo:52,hi:52,conf:'comparable',
+    src:'Average of three 2025 Whatcom County low bids for cement concrete sidewalk: Ferndale Terrace $91/sq yd, Lynden Bradley Rd $80, Lynden 1st and Main $110 (55 sq yd). Average $93.67/sq yd, or $52/ft for a 5 ft walk. Range $44 to $61/ft. Cross-check: 2025-26 WSDOT bids ran $55 to $160/sq yd. Bid-item prices only; mobilization, traffic control, survey and design are bid separately.',
+    links:[{t:'Ferndale Terrace certified bid tab (Feb 2025)',u:'https://cityofferndale.org/DocumentCenter/View/1093/250221-FT-Bid-Tab-Signed-Sealed-PDF'},{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'},{t:'Lynden 1st and Main Overlay certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2545'},{t:'WSDOT bid tab 22C517 (cross-check)',u:'https://wsdot.wa.gov/sites/default/files/2026-08/Contracts-bidtabulation-22C517.pdf'}]},
+  curbGutter:{label:'Curb and gutter',unit:'per ft of frontage',lo:47,hi:47,conf:'comparable',
+    src:'Average of three 2025 Whatcom County low bids for cement concrete traffic curb and gutter: Ferndale Terrace $36/ft (5,460 ft), Lynden Bradley Rd $46 (2,650 ft), Lynden 1st and Main $59 (weighted, 405 ft). Average $47/ft. Range $36 to $62. Small runs cost more per foot. Cross-check: WSDOT median $52. Bid-item prices only.',
+    links:[{t:'Ferndale Terrace certified bid tab (Feb 2025)',u:'https://cityofferndale.org/DocumentCenter/View/1093/250221-FT-Bid-Tab-Signed-Sealed-PDF'},{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'},{t:'Lynden 1st and Main Overlay certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2545'}]},
   paving:{label:'Street paving to three-quarter standard',unit:'per ft of frontage',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
-  ramp:{label:'Curb ramp',unit:'each',lo:1755,hi:4500,conf:'comparable',
-    src:'WSDOT bid tabulations, June 2025 to Aug 2026, low bidder: cement concrete curb ramps at $1,755 to $4,500 each across 5 contracts (median $2,600). Bid-item prices only.',
-    links:[{t:'WSDOT bid tab 24C509',u:'https://wsdot.wa.gov/sites/default/files/2026-02/Contracts-bidtabulation-24C509.pdf'},{t:'WSDOT bid tab 22C517',u:'https://wsdot.wa.gov/sites/default/files/2026-08/Contracts-bidtabulation-22C517.pdf'},{t:'WSDOT bid tab 22X309',u:'https://apps.wsdot.wa.gov/sites/default/files/2026-06/Contracts-bidtabulation-22X309.pdf'},{t:'WSDOT bid tab 25Z011',u:'https://wsdot.wa.gov/sites/default/files/2026-03/Contracts-bidtabulation-25Z011.pdf'},{t:'WSDOT bid tab 24Y014',u:'https://wsdot.wa.gov/sites/default/files/2025-06/Contracts-bidtabulation-24Y014.pdf'}]},
-  light:{label:'Street light',unit:'each',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost. WSDOT bids lighting as lump-sum systems, so no per-light price can be drawn from its bid tabs.'},
+  ramp:{label:'Curb ramp',unit:'each',lo:3109,hi:3109,conf:'comparable',
+    src:'Average of three 2025 Whatcom County low bids for cement concrete curb ramps (quantity-weighted within each contract): Ferndale Terrace $3,903, Lynden Bradley Rd $2,724, Lynden 1st and Main $2,700. Average $3,109 each. Range $2,500 to $4,000. Cross-check: WSDOT median $2,600. Bid-item prices only.',
+    links:[{t:'Ferndale Terrace certified bid tab (Feb 2025)',u:'https://cityofferndale.org/DocumentCenter/View/1093/250221-FT-Bid-Tab-Signed-Sealed-PDF'},{t:'Lynden Bradley Rd certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2546'},{t:'Lynden 1st and Main Overlay certified bid tab (May 2025)',u:'https://www.lyndenwa.org/DocumentCenter/View/2545'}]},  light:{label:'Street light',unit:'each',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost. WSDOT bids lighting as lump-sum systems, so no per-light price can be drawn from its bid tabs.'},
   curbExt:{label:'Curb extension at an intersection',unit:'each',lo:10000,hi:20000,conf:'consultant',
-    src:'AVT Consulting estimate for 2729 Peabody St (HDIP-0003 intake). Staff later removed the requirement.'},
+    src:'AVT Consulting estimate for 2729 Peabody St (HDIP-0003 intake), for the curb extension required in the second round of PFC review. Staff later agreed to remove it.'},
   alley:{label:'Alley widening',unit:'per sq ft',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works unit cost.'},
   storm:{label:'Stormwater for new street area',unit:'allowance per case',lo:null,hi:null,conf:'unpriced',src:'Needs a Public Works allowance.'}
 };
@@ -516,18 +515,18 @@ function runCity(s,c,C){ C=C||costToBuild(s); var r=c.fn(s,cityParams(s,c),C); r
 /* ---------- case library ---------- */
 function F(name,len,cls,paved,curb,walk,req){ return {name:name,len:len,cls:cls,paved:paved,curb:curb,walk:walk,req:req}; }
 var CASES = {
-  hdip3:{label:'HDIP-0003: 2729 Peabody St (documented scope)', hypo:false,
-    note:'Sources: pre-application letter PRE2024-0067, the Final Decision, plan set PFC2025-0030, and the AVT intake. 10,000 sq ft lot (about 100 ft on each street, per the plan set), short plat into 4 small lots with 4 ADUs. Existing conditions per the Final Decision (findings 10 and 29): W Maryland St has curb and gutter on the project (south) side, with curb, gutter and sidewalk on the north side; Peabody St is a minimum-standard street with gravel shoulders and sidewalk on each side, no curb. Required: a 5 ft setback sidewalk on the south side of W Maryland St, street trees on both streets, and one ramp. Alley widening to 15 ft is also required; its area is not in the file, so enter it if known. The late curb extension (AVT estimate $10,000 to $20,000) was removed by staff; set it to 1 to see its effect. No engineer\'s estimate is in the file.',
+  hdip3:{label:'HDIP-0003: 2729 Peabody St (full scope as first required)', hypo:false,
+    note:'Sources: pre-application letter PRE2024-0067, the Final Decision, plan set PFC2025-0030, and the AVT intake. 10,000 sq ft lot (about 100 ft on each street, per the plan set), short plat into 4 small lots with 4 ADUs. Existing conditions per the Final Decision (findings 10 and 29): W Maryland St has curb and gutter on the project (south) side, with curb, gutter and sidewalk on the north side; Peabody St is a minimum-standard street with gravel shoulders and sidewalk on each side, no curb. Required: a 5 ft setback sidewalk on the south side of W Maryland St, street trees on both streets, and one ramp. Alley widening to 15 ft is also required; its area is not in the file, so enter it if known. Also counted here: the curb extension at the Peabody and Maryland corner that staff required in the second round of PFC review (AVT estimate $10,000 to $20,000). Staff later agreed to remove it; it is included to show the full cost of the requirements as first imposed. Set Curb ext. to 0 for the final approved scope. No engineer\'s estimate is in the file.',
     frontages:[F('W Maryland St (curb and gutter exist)',100,'local',true,true,false,true),F('Peabody St (gravel shoulder, sidewalk)',100,'local',true,false,true,false)],
-    ramps:1, lights:0, curbExt:0, alleySf:0, use:'res', units:8, constrValue:0, elig:{connects:true}},
+    ramps:1, lights:0, curbExt:1, alleySf:0, use:'res', units:8, constrValue:0, elig:{connects:true}},
   hdip4:{label:'HDIP-0004: 3605 Mill Ave (edge case, cost unverified)', hypo:false,
-    note:'Sources: pre-application letter PRE2026-0058 and the October 28 case brief. Frontage lengths are City GIS parcel edges (not surveyed). Per the letter, 36th St has no pavement, curb, gutter or sidewalk; Samish Way (an arterial, pavement score 79) lacks curb, gutter and sidewalk. Both need three-quarter-standard improvements, and Samish Way needs one street light. One ramp is assumed from the PW note to show the Mill Ave ADA ramp. The builder reported $500,000 to $1,000,000 for the work; that figure is unverified and is shown for reference only, not used in any rate.',
+    note:'Sources: pre-application letter PRE2026-0058 and the October 28 case brief. Frontage lengths are City GIS parcel edges (not surveyed). Per the letter, 36th St has no pavement, curb, gutter or sidewalk; Samish Way (an arterial, pavement score 79) lacks curb, gutter and sidewalk. Both need three-quarter-standard improvements, and Samish Way needs one street light. One ramp is assumed from the PW note to show the Mill Ave ADA ramp.',
     frontages:[F('36th St',149.48,'local',false,false,false,true),F('Samish Way',154.17,'arterial',true,false,false,true),F('Mill Ave (improved)',24.81,'local',true,true,true,false)],
-    ramps:1, lights:1, curbExt:0, alleySf:0, use:'res', units:1, constrValue:0, reported:[500000,1000000], elig:{}},
+    ramps:1, lights:1, curbExt:0, alleySf:0, use:'res', units:1, constrValue:0, elig:{}},
   hdip4b:{label:'HDIP-0004 if Samish Way is dropped', hypo:false,
-    note:'As HDIP-0004, with Samish Way not required, per the November 17 Task Force discussion (staff to confirm in writing). Builder-reported cost covered both streets.',
+    note:'As HDIP-0004, with Samish Way not required, per the November 17 Task Force discussion (staff to confirm in writing).',
     frontages:[F('36th St',149.48,'local',false,false,false,true),F('Samish Way (not required)',154.17,'arterial',true,false,false,false),F('Mill Ave (improved)',24.81,'local',true,true,true,false)],
-    ramps:1, lights:0, curbExt:0, alleySf:0, use:'res', units:1, constrValue:0, reported:[500000,1000000], elig:{}},
+    ramps:1, lights:0, curbExt:0, alleySf:0, use:'res', units:1, constrValue:0, elig:{}},
   custom:{label:'Your own lot', hypo:true,
     note:'Enter your own frontages. Tick what already exists on each street; the required work and every city\'s fee follow from that.',
     frontages:[F('Street 1',50,'local',true,false,false,true)], ramps:0, lights:0, curbExt:0, alleySf:0, use:'res', units:2, constrValue:0, elig:{}}
@@ -546,9 +545,9 @@ var ELIG = [
 /* ---------- UI v4: lot -> city -> reading -> all cities; adjustments folded ---------- */
 (function(){
   var $=function(id){ return document.getElementById(id); };
-  var STORE='hdip-fil-v6', state;
+  var STORE='hdip-fil-v9', state;
   var LOT={
-    hdip3:['2729 Peabody St','HDIP-0003, documented scope','Four small lots with four ADUs. Staff required a sidewalk and one ramp on W Maryland St, where curb and gutter already exist.'],
+    hdip3:['2729 Peabody St','HDIP-0003, full scope as first required','Four small lots with four ADUs. Sidewalk and one ramp on W Maryland St (curb and gutter already exist), plus the corner curb extension staff later removed.'],
     hdip4:['3605 Mill Ave','HDIP-0004, the edge case','One home on a corner lot with two unimproved streets, one of them an arterial. The builder did not proceed.'],
     hdip4b:['3605 Mill Ave, 36th St only','HDIP-0004 if Samish Way is dropped','The same lot with Samish Way not required, as discussed at the November 17 Task Force (staff to confirm).'],
     custom:['Your own lot','Enter any streets and lengths','Describe the lot under "Edit the lot" below.']
@@ -752,7 +751,7 @@ var ELIG = [
     B.push(s.origin==='docs'?[ed?'w':'','Lengths',ed?'City documents, then edited':'City documents and parcel map',ed?'edited':'City docs']:s.origin==='maps'?[ed?'w':'','Lengths',ed?'City parcel map, then edited':'City parcel map',ed?'edited':'parcel map']:['n','Lengths','entered by you','your entry']);
     B.push(s.origin==='docs'?[ed?'w':'','Scope',ed?'curb, sidewalk, ramps from the pre-application letter, then edited':'curb, sidewalk, ramps from the pre-application letter',ed?'edited':'pre-app letter']:s.origin==='maps'?['w','Scope','sidewalk from City map; curb and ramps are guesses','partly guessed']:['n','Scope','entered by you','your entry']);
     var np=C.items.filter(function(it){return it.priced;}).length;
-    B.push(C.lo==null?['b','Cost','no element priced','none priced']:C.partial?['w','Cost',np+' of '+C.items.length+' elements priced, from WSDOT bids',np+' of '+C.items.length+' priced']:['w','Cost','all elements priced from WSDOT bids and a consultant estimate; Bellingham has not supplied costs','WSDOT bids']);
+    B.push(C.lo==null?['b','Cost','no element priced','none priced']:C.partial?['w','Cost',np+' of '+C.items.length+' elements priced, from Whatcom County bids',np+' of '+C.items.length+' priced']:['w','Cost','all elements priced from Whatcom County bids and a consultant estimate; Bellingham has not supplied costs','Whatcom bids']);
     B.push(CC?['n','City cost','your entry, +'+m+'%','+'+m+'%']:['b','City cost','not set, so no shortfall','not set']);
     $('basis').innerHTML=B.map(function(x){ return '<li class="'+x[0]+'" tabindex="0" title="'+esc(x[1]+': '+x[2])+'"><b>'+x[1]+'</b> '+esc(x[3])+'</li>'; }).join('');
     $('oCost').classList.toggle('dim',C.lo==null); $('oPct').classList.toggle('dim',isB||!sh); $('oGap').classList.toggle('dim',!isB&&!CC);
