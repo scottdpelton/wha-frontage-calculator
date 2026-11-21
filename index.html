@@ -221,7 +221,7 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
 .br>span:first-child,.bgh>b,.rh>b,.bt>span{min-width:0;flex:1 1 auto}.br>span:last-child,.bgh>span,.rt{flex:0 0 auto;text-align:right}
 #map{height:360px;border-radius:8px;margin-top:8px;border:1px solid var(--line)}@media(max-width:620px){#map{height:320px}}
 .mapwrap{position:relative;z-index:0;isolation:isolate}#map{position:relative;z-index:0}.mapmove{position:absolute;left:8px;bottom:26px;z-index:500;font-size:13px;padding:4px 10px}
-.mapmsg{font-size:13px;margin:6px 0 0}.mapkey{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--muted);margin-top:4px}.mapkey i{display:inline-block;width:14px;height:4px;border-radius:2px;margin-right:5px;vertical-align:middle}.mapkey i.dash{background:repeating-linear-gradient(90deg,#999 0 4px,transparent 4px 7px)}
+.mapmsg{font-size:13px;margin:6px 0 0}.mapkey{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--muted);margin-top:4px}.mapkey i{display:inline-block;width:14px;height:4px;border-radius:2px;margin-right:5px;vertical-align:middle}.mapkey i.dot{width:9px;height:9px;border-radius:50%}.mapkey i.dash{background:repeating-linear-gradient(90deg,#999 0 4px,transparent 4px 7px)}
 .leaflet-control-attribution{font-size:10px!important;max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 @media(max-width:760px){
@@ -233,6 +233,7 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
 .cbtn{font-size:14px;line-height:1.2;padding:7px 12px;border-radius:999px;border:1.5px solid var(--line);scroll-snap-align:start}
 .cbtn.on{border-color:var(--acc);box-shadow:none}
 }
+#caseNote{white-space:pre-line;line-height:1.5}
 </style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -249,11 +250,11 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
     <section class="panel">
       <div class="look">
         <label for="addr">Look up any Bellingham address</label>
-        <input id="addr" type="text" placeholder="Type an address, e.g. 3605 Mill Ave" autocomplete="off" spellcheck="false">
+        <input id="addr" type="text" placeholder="Address or parcel number, e.g. 3605 Mill Ave" autocomplete="off" spellcheck="false">
         <div id="addrList"></div><p class="muted" id="addrMsg" role="status"></p>
         <div class="mapwrap"><div id="map"></div><button type="button" class="btn mapmove" id="mapMove" hidden>Move map</button></div>
         <p class="muted mapmsg" id="mapMsg" role="status"></p>
-        <div id="mapKey" class="mapkey"><span><i style="background:#ff7a1a"></i>Parcel</span><span><i style="background:#22c55e"></i>Sidewalk</span><span><i style="background:#ffcc00"></i>Incomplete</span><span><i class="dash"></i>Street center</span></div>
+        <div id="mapKey" class="mapkey"><span><i style="background:#ff7a1a"></i>Parcel</span><span><i style="background:#22c55e"></i>Sidewalk</span><span><i style="background:#ffcc00"></i>Incomplete</span><span><i class="dash"></i>Street center</span><span><i class="dot" style="background:#22c55e"></i>Ramp</span><span><i class="dot" style="background:#ef4444"></i>Ramp, no domes</span></div>
       </div>
       <h2 style="margin-top:14px">or use a documented case</h2>
       <div class="lots" id="lotBtns"></div>
@@ -661,7 +662,7 @@ var MAP=(function(){
     cob.addTo(m); L.control.layers({'City aerial 2022':cob,'Esri aerial':air,'Street map':st},null,{position:'topright'}).addTo(m);
     grp=L.layerGroup().addTo(m);
     if(touch){ var b=document.getElementById('mapMove'); b.hidden=false; b.onclick=function(){ if(m.dragging.enabled()){ m.dragging.disable(); b.textContent='Move map'; } else { m.dragging.enable(); b.textContent='Lock map'; } }; }
-    m.on('click',function(e){ var p=e.latlng; q('ReportLayers/MapServer/2',{geometry:p.lng+','+p.lat,geometryType:'esriGeometryPoint',inSR:4326,spatialRel:'esriSpatialRelIntersects',outFields:'Site_Address',returnGeometry:'false'}).then(function(j){ var f=j.features&&j.features[0]; if(f&&f.properties.Site_Address) onPick(f.properties.Site_Address); else MAP.msg('No addressed parcel there.'); }).catch(function(){ MAP.msg('City map service did not respond.'); }); });
+    m.on('click',function(e){ var p=e.latlng; q('ReportLayers/MapServer/2',{geometry:p.lng+','+p.lat,geometryType:'esriGeometryPoint',inSR:4326,spatialRel:'esriSpatialRelIntersects',outFields:'Site_Address,PARCEL_CODE',returnGeometry:'false'}).then(function(j){ var f=j.features&&j.features[0]; if(f&&f.properties.Site_Address) onPick(f.properties.Site_Address); else if(f&&f.properties.PARCEL_CODE) onPick('PARCEL '+f.properties.PARCEL_CODE); else MAP.msg('No parcel there.'); }).catch(function(){ MAP.msg('City map service did not respond.'); }); });
   }
   function show(addr,onPick){
     return load().then(function(){
@@ -676,6 +677,7 @@ var MAP=(function(){
         var env=[big.getWest(),big.getSouth(),big.getEast(),big.getNorth()].join(','), g={geometry:env,geometryType:'esriGeometryEnvelope',inSR:4326,spatialRel:'esriSpatialRelIntersects',returnGeometry:'true'};
         return Promise.all([
           q('Grp_Transportation/MapServer/34',Object.assign({where:'1=1',outFields:'Name,ST_Class'},g)).then(function(s){ L.geoJSON(s,{style:{color:'#ffffff',weight:2,dashArray:'6 6',opacity:0.9},onEachFeature:function(f,l){ if(f.properties.Name) l.bindTooltip(f.properties.Name+(f.properties.ST_Class?' · '+f.properties.ST_Class:''),{sticky:true}); }}).addTo(grp); }),
+          q('Grp_Transportation/MapServer/10',Object.assign({where:'1=1',outFields:'TRUNCATEDDOME'},g)).then(function(r){ L.geoJSON(r,{pointToLayer:function(f,ll){ var ok=f.properties.TRUNCATEDDOME==='Yes'; return L.circleMarker(ll,{radius:6,color:'#fff',weight:2,fillColor:ok?'#22c55e':'#ef4444',fillOpacity:1}).bindTooltip(ok?'Curb ramp with warning domes':'Curb ramp without warning domes (older design)'); }}).addTo(grp); }),
           q('Grp_Transportation/MapServer/16',Object.assign({where:'1=1',outFields:'STREETNAME,INCOMPLETE,WIDTH'},g)).then(function(w){ L.geoJSON(w,{style:function(f){ var inc=String(f.properties.INCOMPLETE||'').toUpperCase(); return {color:(inc==='YES'||inc==='Y')?'#ffcc00':'#22c55e',weight:5,opacity:0.95}; },onEachFeature:function(f,l){ l.bindTooltip('Sidewalk'+(f.properties.STREETNAME?' · '+f.properties.STREETNAME:'')+(f.properties.WIDTH?' · '+f.properties.WIDTH+' ft':''),{sticky:true}); }}).addTo(grp); })
         ]).then(function(){ par.bringToFront(); MAP.msg('Tap any parcel to load it. No green line along an edge means no mapped sidewalk.'); });
       });
@@ -686,7 +688,7 @@ var MAP=(function(){
 /* ---------- UI v4: lot -> city -> reading -> all cities; adjustments folded ---------- */
 (function(){
   var $=function(id){ return document.getElementById(id); };
-  var STORE='hdip-fil-v18', state;
+  var STORE='hdip-fil-v19', state;
   var LOT={
     hdip3:['2729 Peabody St','HDIP-0003, full scope as first required','Four small lots with four ADUs. Sidewalk and one ramp on W Maryland St (curb and gutter already exist), plus the corner curb extension staff later removed.'],
     hdip4:['3605 Mill Ave','HDIP-0004, the edge case','One home on a corner lot with two unimproved streets, one of them an arterial. The builder did not proceed.'],
@@ -736,10 +738,10 @@ var MAP=(function(){
     return s.split(' ').map(function(w,i){ return i>0&&SUF[w]?SUF[w]:w; }).join(' ');
   }
   function search(){
-    var qy=normAddr($('addr').value);
+    var qy=normAddr($('addr').value); if(/^\d{9,}$/.test(qy.replace(/[- ]/g,''))) qy='PARCEL '+qy.replace(/[- ]/g,'');
     if(qy.length<3){ $('addrList').innerHTML=''; $('addrMsg').textContent=''; return; }
     getLots().then(function(j){
-      if(normAddr($('addr').value)!==qy) return;
+      var q2=normAddr($('addr').value); if(/^\d{9,}$/.test(q2.replace(/[- ]/g,''))) q2='PARCEL '+q2.replace(/[- ]/g,''); if(q2!==qy) return;
       var hits=[], L=j.lots; for(var i=0;i<L.length&&hits.length<8;i++){ if(L[i][0].indexOf(qy)===0) hits.push(i); }
       if(hits.length<8) for(i=0;i<L.length&&hits.length<8;i++){ if(L[i][0].indexOf(qy)>0) hits.push(i); }
       if(!hits.length){ var tk=qy.split(' '); if(tk.length>1) for(i=0;i<L.length&&hits.length<8;i++){ var a=L[i][0]; if(a.indexOf(tk[0]+' ')===0&&a.indexOf(tk[1])>0) hits.push(i); } }
@@ -752,16 +754,31 @@ var MAP=(function(){
     var L=j.lots[h], name=tc(L[0]);
     loadCase('custom');
     state.caseName=name; state.origin='maps';
-    state.frontages=L[3].map(function(f){ var w=f[3]>0; return F((j.streets[f[0]]==='Unmapped right-of-way'?'Right-of-way with no mapped street':tc(j.streets[f[0]]))+(f[3]===2?' (sidewalk marked incomplete)':''),f[1],f[2]?'arterial':'local',!!f[4],false,w,!w); });
+    var SN=function(f){ var n=j.streets[f[0]]; return n==='Unmapped right-of-way'?'Right-of-way with no mapped street':tc(n); };
+    state.frontages=L[3].map(function(f){ var w=f[3]>0; return F(SN(f)+(f[3]===2?' (sidewalk marked incomplete)':''),f[1],f[2]?'arterial':'local',!!f[4],w,w,!w); });
+    var reqArt=L[3].filter(function(f){ return !(f[3]>0)&&f[2]&&!f[7]; }).length; state.lights=reqArt;
     state.brief=name+', a first draft read from the City\'s public maps. Correct it under "Edit the lot".';
-    state.caseNote='From City maps, November 20, 2026. '+L[1].toLocaleString()+' sq ft'+(L[2]?', '+L[2]+' ft of alley':'')+'. Maps show sidewalks only: curb, ramps, lights and "Req\'d" are guesses to correct.';
+    state.caseNote='From City maps, November 20, 2026. '+L[1].toLocaleString()+' sq ft'+(L[2]?', '+L[2]+' ft of alley':'')+'. Paving, storm mains, lights, ramps and the pedestrian plan come from City layers; curb and "Req\'d" are guesses to correct.';
     var stn=L[0].split(' ').slice(1).join(' '), have=L[3].some(function(f){ var n=String(j.streets[f[0]]).toUpperCase(); return n===stn||n.indexOf(stn)>=0||stn.indexOf(n)>=0; });
-    if(!have) state.caseNote+=' Check: the map read found no frontage on '+tc(stn)+', the street in the address. If the lot touches it, use "Add street".';
+    var nn=[];
+    var pm=L[3].filter(function(f){return f[8];}); if(pm.length) nn.push('The City\'s Pedestrian Master Plan lists sidewalk work still to do on '+pm.map(function(f){return SN(f)+' (tier '+(f[8]-1)+')';}).join(' and ')+'.');
+    nn.push('Curb is assumed wherever sidewalk is mapped; the City does not map curbs, and catch basins also sit on ditched streets, so they are not used.');
+    var gv=L[3].filter(function(f){return f[10]&&!f[4];}); if(gv.length) nn.push('City pavement map shows gravel on '+gv.map(SN).join(', ')+'.');
+    var sm=L[3].filter(function(f){return f[6];}); nn.push(sm.length?'A City storm main runs along '+sm.map(SN).join(', ')+', so a pipe connection is likely (high end of the stormwater range).':'No City storm main along the frontage, so on-site infiltration is likely (low end of the stormwater range).');
+    if(reqArt) nn.push(reqArt+' street light counted: an arterial frontage with no mapped City light.');
+    var na=L[3].filter(function(f){return f[9];}); if(na.length) nn.push('Mapped sidewalk on '+na.map(SN).join(', ')+' is under 5 ft wide; the City may require widening.');
+    if(L[5]===2) nn.push('The alley is gravel on the City map.');
+    state.caseNote+='\n• '+nn.join('\n• ');
+    var cr=L[4]||0;
+    if(cr===1){ state.ramps=0; state.caseNote+='\n• Corner lot: the City map shows a curb ramp with warning domes at the corner, so no ramp is counted.'; }
+    else if(cr===2){ state.ramps=1; state.caseNote+='\n• Corner lot: the City map shows a curb ramp without warning domes at the corner (older design), so 1 ramp upgrade is counted (a guess to confirm).'; }
+    else if(cr===3){ state.ramps=1; state.caseNote+='\n• Corner lot: no curb ramp is mapped at the corner, so 1 new ramp is counted (a guess to confirm).'; }
+    if(!have&&L[0].indexOf('PARCEL ')!==0) state.caseNote+='\n• Check: the map read found no frontage on '+tc(stn)+', the street in the address. If the lot touches it, use "Add street".';
     $('addr').value=''; $('addrList').innerHTML=''; $('addrMsg').textContent='';
     renderLots(); renderLot(); render();
-    MAP.show(L[0],pickByAddr);
+    MAP.show(L[0].indexOf('PARCEL ')===0?'PC:'+L[0].slice(7):L[0],pickByAddr);
   }
-  function mapAddr(){ if(!state) return null; if(state.origin==='maps') return state.caseName.toUpperCase(); return {hdip3:'PC:380319019221',hdip4:'3605 MILL AVE',hdip4b:'3605 MILL AVE'}[state.caseId]||null; }
+  function mapAddr(){ if(!state) return null; if(state.origin==='maps'){ var cn=state.caseName.toUpperCase(); return cn.indexOf('PARCEL ')===0?'PC:'+cn.slice(7):cn; } return {hdip3:'PC:380319019221',hdip4:'3605 MILL AVE',hdip4b:'3605 MILL AVE'}[state.caseId]||null; }
   function syncMap(){ MAP.show(mapAddr(),pickByAddr); }
   function pickByAddr(a){ getLots().then(function(j){ var A=String(a).toUpperCase().trim(); for(var i=0;i<j.lots.length;i++){ if(j.lots[i][0]===A){ pickLot(j,i); return; } } MAP.msg(tc(A)+': no street frontage on the City map, so it is not in the cost list.'); }); }
 
