@@ -99,6 +99,10 @@ input[type=checkbox],input[type=radio]{width:17px;height:17px;accent-color:var(-
 .tr2 #rLot{font-weight:600;font-size:15px}
 .title .src{color:inherit}
 .tradeoff{margin:0 0 8px;font-size:14px;color:var(--muted);line-height:1.4}
+.tradeoff summary{cursor:pointer;font-size:13px}
+.out .s{display:none}.out.open .s{display:block}
+.info{background:none;border:0;padding:0 0 0 5px;color:var(--muted);cursor:pointer;font-size:13px;line-height:1}
+.lk{display:inline-block;margin-top:4px;font-size:13px}
 .outs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);border-radius:6px;overflow:hidden}
 .out{padding:10px 12px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--soft)}
 .out:nth-child(3n){border-right:0}.out:nth-last-child(-n+3){border-bottom:0}
@@ -230,14 +234,14 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
   <div>
     <section class="panel" id="reading" aria-live="polite">
       <div class="title"><div><span class="tl">Result under the rules of</span><b id="rHead"></b></div><div class="tr2"><span id="rLot"></span><span id="mMeta"></span></div></div>
-      <p class="tradeoff">The trade-off: the developer either builds the street work, or (where a city allows it) pays a one-time fee and the city builds it later.</p>
+      <details class="tradeoff"><summary>How to read these</summary>The developer either builds the street work, or (where a city allows it) pays a one-time fee and the city builds it later. Tap ⓘ on any card for what it means.</details>
       <div class="outs">
-        <div class="out key"><div class="l">Fee instead of building</div><div class="v" id="rFee"></div><div class="s" id="rFeeS"></div></div>
-        <div class="out" id="oCost"><div class="l">Cost if the developer builds it</div><div class="v" id="rCost"></div><div class="s"><span id="rCostS"></span> <button type="button" class="link" id="goCost">Unit costs</button></div></div>
-        <div class="out" id="oSave"><div class="l">Developer saves by paying the fee</div><div class="v" id="rSave"></div><div class="s" id="rSaveS"></div></div>
-        <div class="out" id="oPct"><div class="l">Share of the work the fee pays for</div><div class="v" id="rPct"></div><div class="s" id="rPctS"></div></div>
-        <div class="out" id="oGap"><div class="l">Left for the City to fund later</div><div class="v" id="rGap"></div><div class="s" id="rGapS"></div></div>
-        <div class="out"><div class="l">Fee per foot of street</div><div class="v" id="rPerFt"></div><div class="s" id="rPerFtS"></div></div>
+        <div class="out key"><div class="l">Fee instead of building<button type="button" class="info" aria-label="What this means">ⓘ</button></div><div class="v" id="rFee"></div><div class="s" id="rFeeS"></div></div>
+        <div class="out" id="oCost"><div class="l">Cost to build<button type="button" class="info" aria-label="What this means">ⓘ</button></div><div class="v" id="rCost"></div><div class="s"><span id="rCostS"></span></div><button type="button" class="link lk" id="goCost">Unit costs</button></div>
+        <div class="out" id="oSave"><div class="l">Developer saves<button type="button" class="info" aria-label="What this means">ⓘ</button></div><div class="v" id="rSave"></div><div class="s" id="rSaveS"></div></div>
+        <div class="out" id="oPct"><div class="l">Fee covers<button type="button" class="info" aria-label="What this means">ⓘ</button></div><div class="v" id="rPct"></div><div class="s" id="rPctS"></div></div>
+        <div class="out" id="oGap"><div class="l">City shortfall<button type="button" class="info" aria-label="What this means">ⓘ</button></div><div class="v" id="rGap"></div><div class="s" id="rGapS"></div></div>
+        <div class="out"><div class="l">Fee per foot<button type="button" class="info" aria-label="What this means">ⓘ</button></div><div class="v" id="rPerFt"></div><div class="s" id="rPerFtS"></div></div>
       </div>
       <p class="rnote" id="rNote" hidden></p>
       <div class="basis"><span class="bl">Based on</span><ul id="basis"></ul></div>
@@ -766,7 +770,7 @@ var ELIG = [
     $('rGapS').textContent=isB?'the developer builds it all now':CC?'what the City would spend building it later, minus the fee it collected':dC?'if the City builds it for what a developer would pay; City projects usually cost more':'enter what the City would pay to build it, under Unit costs';
     var ref=$('rRef'); if(s.reported){ ref.hidden=false; ref.textContent='Builder-reported cost for this work: '+usd(s.reported[0])+' to '+usd(s.reported[1])+'. Unverified; not used above.'; } else ref.hidden=true;
     var miss=C.items.filter(function(it){return !it.priced;}).map(function(it){return it.label;});
-    var nt=$('rNote'); if(C.partial&&!isB){ nt.hidden=false; nt.innerHTML='<b>+</b><span>Not priced yet: '+esc(miss.join(', '))+'. So cost and savings read low, and the share reads high. Price it under Unit costs.</span>'; } else nt.hidden=true;
+    var nt=$('rNote'); if(C.partial&&!isB){ nt.hidden=false; nt.innerHTML='<b>+</b><span>Not priced: '+esc(miss.join(', '))+'. Costs read low.</span>'; } else nt.hidden=true;
     $('mHowName').textContent=nm(c);
     $('mMath').textContent=r.lines.join('\n');
     $('costLines').textContent=C.items.length? C.items.map(function(it){ if(it.pct) return it.label+': '+s.rates[it.k].lo+(s.rates[it.k].hi!==s.rates[it.k].lo?'–'+s.rates[it.k].hi:'')+'% = '+usdR(it.lo,it.hi); return it.label+': '+(it.unit.indexOf('ft')>-1&&it.unit.indexOf('sq')<0?ft(it.qty):it.qty)+(it.priced?' x '+usdR(s.rates[it.k].lo,s.rates[it.k].hi)+' = '+usdR(it.lo,it.hi):'  (not priced)'); }).join('\n')+'\nDeveloper\'s cost, priced items: '+usdR(C.lo,C.hi)+'\nCity\'s cost to build later: '+(CC?usdR(CC.lo,CC.hi)+' (developer\'s cost + '+m+'%)':'not set') : 'No required work.';
@@ -807,6 +811,7 @@ var ELIG = [
     all();
     $('addFront').addEventListener('click',function(){ if(state.frontages.length>=6) return; state.frontages.push(F('Street '+(state.frontages.length+1),50,'local',true,false,false,true)); edited(); renderLot(); render(); });
     ['ramps','lights','curbExt','alleySf','constrValue','width'].forEach(function(k){ $(k).addEventListener('input',function(){ state[k]=parseFloat($(k).value)||0; if(k!=='width'&&k!=='constrValue') edited(); render(); }); });
+    document.querySelectorAll('.outs .info').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); b.closest('.out').classList.toggle('open'); }); });
     $('cityMarkup').addEventListener('input',function(){ var v=parseFloat($('cityMarkup').value); state.cityMarkup=isNaN(v)?null:v; render(false); });
     $('use').addEventListener('change',function(){ state.use=$('use').value; render(); });
     document.querySelectorAll('[name=step]').forEach(function(x){ x.addEventListener('change',function(){ state.step=x.value; render(); }); });
