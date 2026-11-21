@@ -55,7 +55,7 @@ h2{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 8px;text-transfo
 #addrList button{text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:7px 4px;cursor:pointer}
 #addrList button:hover{background:var(--soft)}
 #addrMsg{font-size:13px;margin:4px 0 0}
-.citybar{position:sticky;top:0;z-index:5;display:flex;gap:10px;align-items:baseline;padding:8px max(12px,2vw);background:var(--panel);border-bottom:1px solid var(--line)}
+.citybar{position:sticky;top:0;z-index:1100;display:flex;gap:10px;align-items:baseline;padding:8px max(12px,2vw);background:var(--panel);border-bottom:1px solid var(--line)}
 .cl{font-size:13px;color:var(--muted);white-space:nowrap;flex:none}
 #cityBtns{display:flex;flex-wrap:wrap;gap:6px 0;align-items:center}
 .grp{display:flex;gap:5px;align-items:center;padding:0 10px;border-left:1px solid var(--line)}
@@ -220,7 +220,7 @@ footer{grid-column:1/-1;font-size:12.5px;color:var(--muted);padding:2px 2px 24px
 }
 .br>span:first-child,.bgh>b,.rh>b,.bt>span{min-width:0;flex:1 1 auto}.br>span:last-child,.bgh>span,.rt{flex:0 0 auto;text-align:right}
 #map{height:360px;border-radius:8px;margin-top:8px;border:1px solid var(--line)}@media(max-width:620px){#map{height:320px}}
-.mapwrap{position:relative}.mapmove{position:absolute;left:8px;bottom:26px;z-index:500;font-size:13px;padding:4px 10px}
+.mapwrap{position:relative;z-index:0;isolation:isolate}#map{position:relative;z-index:0}.mapmove{position:absolute;left:8px;bottom:26px;z-index:500;font-size:13px;padding:4px 10px}
 .mapmsg{font-size:13px;margin:6px 0 0}.mapkey{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--muted);margin-top:4px}.mapkey i{display:inline-block;width:14px;height:4px;border-radius:2px;margin-right:5px;vertical-align:middle}.mapkey i.dash{background:repeating-linear-gradient(90deg,#999 0 4px,transparent 4px 7px)}
 .leaflet-control-attribution{font-size:10px!important;max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
