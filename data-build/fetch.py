@@ -17,5 +17,5 @@ def pull(u,fields,where,page,out,sr=2285,off=2,n=None):
 if __name__=="__main__":
   pull(b+"/Maps/ReportLayers/MapServer/2","OBJECTID,PARCEL_CODE,Land_Use_Code,Land_Use_Description,Site_Address,legal_acreage,Mapped_Area","Site_City='BELLINGHAM'",1000,'parcels.json')
   pull(b+"/Maps/Grp_Transportation/MapServer/16","OBJECTID,STREETNAME,STREETSIDE,INCOMPLETE,WIDTH,FeatureLengthFeet,TRAIL","1=1",1000,'walks.json')
-  pull(b+"/Maps/Grp_Transportation/MapServer/34","OBJECTID,Name,ST_Class,Jurisdiction,HWY_Number","1=1",1000,'streets.json')
+  pull(b+"/Maps/Grp_Transportation/MapServer/34","OBJECTID,Name,ST_Class,Jurisdiction,HWY_Number,CurbType1,CurbType2,StreetWidth,AssetID","1=1",1000,'streets.json')
   pull(b+"/maps_StatePlane/Grp_Planning_StatePlane/MapServer/8","ZONING_DESIGNATION,GENERAL_USE_TYPE,NEIGHBORHOOD_NAME","1=1",200,'zoning.json',off=5)

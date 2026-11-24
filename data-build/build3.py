@@ -34,6 +34,16 @@ for f in json.load(open('walks.json')):
         for p in f['geometry']['paths']:
             if len(p)>1: walkW.append(f['attributes'].get('WIDTH'))
 PAVED={'ACP','PCC','PC','BST','BR'}
+CURBC={'C&G':1,'CURB':2,'THICKN':3,'NONE':4}
+def curbcode(ct,walk=False):
+    # City street centerline CurbType1/CurbType2 (2024-25 pavement survey). Type2 is a secondary type, not the other side:
+    # 0 no record, 1 curb and gutter, 2 curb without gutter, 3 thickened edge, 4 none; +10 = block has two types, side inferred from sidewalk
+    if not ct or not ct[0]: return 0
+    a=CURBC.get(ct[0],0); b=CURBC.get(ct[1] or 'NONE',4)
+    if b in (4,a) or not a: return a
+    # mixed: two curb types on one block, side not recorded. Assume the better one sits on the side with sidewalk.
+    hi_,lo_=min(a,b),max(a,b)
+    return 10+(hi_ if walk else lo_)
 def outward(line,poly,d):
     out=[]
     n=max(3,int(line.length//10))
@@ -59,7 +69,7 @@ def enrich(poly,r):
     else: paved=r['paved'];known=0
     _g=list(getattr(L,'geoms',[L]));c=list(_g[0].coords)+list(_g[-1].coords);a0,a1=c[0],c[-1];dx,dy=a1[0]-a0[0],a1[1]-a0[1];dl=math.hypot(dx,dy) or 1;ux,uy=dx/dl,dy/dl
     ext=LineString([(a0[0]-ux*100,a0[1]-uy*100),(a1[0]+ux*100,a1[1]+uy*100)])
-    curb=1 if any(CB[k].distance(ext)<=14 and CB[k].distance(L)<=110 and not poly.contains(CB[k]) for k in cbt.query(ext.buffer(14))) else 0
+    curb=curbcode(r.get('ct'),r.get('walk'))
     smain=1 if any(SM[k].distance(L)<=45 for k in smt.query(L.buffer(45))) else 0
     light=1 if any(LT[k].distance(L)<=25 for k in ltt.query(L.buffer(25))) else 0
     tier=0
@@ -125,5 +135,5 @@ for i,a in enumerate(F.attrs):
         st['curb']+=curb;st['pmp']+=tier>0;st['unpaved']+=pv==0;st['narrow']+=nar
     out.append([ad,round(poly.area),round(al),rows,0,alinfo])
 out.sort(key=lambda x:x[0])
-json.dump({'asof':'2026-11-20','streets':names,'lots':out},open('lots3.json','w'),separators=(',',':'))
+json.dump({'asof':'2026-11-24','streets':names,'lots':out},open('lots3.json','w'),separators=(',',':'))
 print(st,len(names),round(time.time()-t))

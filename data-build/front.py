@@ -87,7 +87,7 @@ def analyze(i):
                 inc=any(winc[k] and wl[k].intersection(strip).length>0.3*line.length for k in idx)
         if best:
             a=best[1];cls='arterial' if a['ST_Class'] in (2,6,10) else 'local'
-            res.append(dict(name=(a['Name'] or 'Unnamed street').title(),len=round(s['L'],1),kind='street',cls=cls,walk=cov>=0.5,inc=inc,cov=round(cov,2),paved=True,line=line))
+            res.append(dict(name=(a['Name'] or 'Unnamed street').title(),len=round(s['L'],1),kind='street',cls=cls,walk=cov>=0.5,inc=inc,cov=round(cov,2),paved=True,line=line,ct=(a.get('CurbType1'),a.get('CurbType2'))))
         else:
             res.append(dict(name='Unmapped right-of-way',len=round(s['L'],1),kind='street',cls='local',walk=cov>=0.5,inc=inc,cov=round(cov,2),paved=False,line=line))
     return res
@@ -143,5 +143,5 @@ def addr_fix(i,res,ad):
         keep.append(r)
     a=sa[segs[0][1]];cls='arterial' if a['ST_Class'] in (2,6,10) else 'local'
     cov,inc=walkcov(line,22)
-    keep.append(dict(name=(a['Name'] or st).title(),len=round(L,1),kind='street',cls=cls,walk=cov>=0.5,inc=inc,cov=round(cov,2),paved=True,line=line,fixed=True))
+    keep.append(dict(name=(a['Name'] or st).title(),len=round(L,1),kind='street',cls=cls,walk=cov>=0.5,inc=inc,cov=round(cov,2),paved=True,line=line,fixed=True,ct=(a.get('CurbType1'),a.get('CurbType2'))))
     return keep,True
